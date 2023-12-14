@@ -1,6 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
+static int fuzzy = 0;                      /* -F  option; if 0, dmenu doesn't use fuzzy matching     */
+
 static int min_width = 500;
 
 static const int user_bh = 5;               /* add an defined amount of pixels between items in list */
