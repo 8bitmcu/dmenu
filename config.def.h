@@ -1,23 +1,43 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
+/* -F  option; if 0, dmenu doesn't use fuzzy matching     */
+static int fuzzy = 0;
 
-static int fuzzy = 0;                      /* -F  option; if 0, dmenu doesn't use fuzzy matching     */
-
+/* Minimum width of the window */
 static int min_width = 480;
 
-static const int user_bh = 5;               /* add an defined amount of pixels between items in list */
+/* add an defined amount of pixels between items in list */
+static const int user_bh = 5;
 
+/* Window border */
 static const int border_width = 1;
 
+/* Padding between border and content */
 static const int border_padding = 20;
 
-static const unsigned int prompt_offset = 10;
+/* amount of pixel between the prompt and other list items */
+static const unsigned int prompt_offset = 10; 
 
-static const unsigned int alpha = 0xcc;     /* Amount of opacity. 0xff is opaque             */
+/* Amount of opacity. 0xff is opaque */
+static const unsigned int alpha = 0xcc;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = { "monospace:size=14" };
-static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
+
+/* -p  option; prompt to the left of input field */
+static const char *prompt = NULL;
+
+/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+static unsigned int lines = 15;
+
+/* character that will be used to hide text when the -P option is specified */
+static const char censor_char = '*';
+/*
+ * Characters not considered part of a word while deleting words
+ * for example: " /?\"&[]"
+ */
+static const char worddelimiters[] = " ";
+
 static const char *colors[SchemeLast][2] = {
 	/*     fg         bg       */
 	[SchemeNorm] = { "#bbbbbb", "#000000" },
@@ -37,11 +57,3 @@ static const unsigned int alphas[SchemeLast][2] = {
 	[SchemeBorder] = { OPAQUE, alpha }
 };
 
-/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
-static unsigned int lines      = 15;
-
-/*
- * Characters not considered part of a word while deleting words
- * for example: " /?\"&[]"
- */
-static const char worddelimiters[] = " ";

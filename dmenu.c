@@ -43,7 +43,7 @@ struct item {
 static char text[BUFSIZ] = "";
 static char *embed;
 static int bh, mw, mh;
-static int inputw = 0, promptw;
+static int inputw = 0, promptw, passwd = 0;
 static int lrpad; /* sum of left and right padding */
 static size_t cursor;
 static struct item *items = NULL;
@@ -212,6 +212,7 @@ drawmenu(void)
 	unsigned int curpos;
 	struct item *item;
 	int x = 0, y = border_padding/2, w;
+	char *censort;
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
@@ -223,7 +224,13 @@ drawmenu(void)
 	/* draw input field */
 	w = (lines > 0 || !matches) ? mw - x : inputw;
 	drw_setscheme(drw, scheme[SchemeOut]);
-	drw_text(drw, x, y, w, bh, lrpad / 2, text, 0);
+
+	if (passwd) {
+	        censort = ecalloc(1, sizeof(text));
+		memset(censort, censor_char, strlen(text));
+		drw_text(drw, x, y, w, bh, lrpad / 2, censort, 0);
+		free(censort);
+	} else drw_text(drw, x, y, w, bh, lrpad / 2, text, 0);
 
 	curpos = TEXTW(text) - TEXTW(&text[cursor]);
 	if ((curpos += lrpad / 2 - 1) < w) {
@@ -800,6 +807,11 @@ readstdin(void)
 	size_t i, itemsiz = 0, linesiz = 0;
 	ssize_t len;
 
+	if(passwd){
+    	inputw = lines = 0;
+    	return;
+ 	}
+
 	/* read each line from stdin and add it to the item list */
 	for (i = 0; (len = getline(&line, &linesiz, stdin)) != -1; i++) {
 		if (i + 1 >= itemsiz) {
@@ -975,7 +987,7 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	die("usage: dmenu [-bfivP] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
       "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
@@ -1007,6 +1019,8 @@ main(int argc, char *argv[])
 			mon = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
 			prompt = argv[++i];
+		else if (!strcmp(argv[i], "-P"))   /* is the input a password */
+			passwd = 1;
 		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
 			fonts[0] = argv[++i];
 		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
