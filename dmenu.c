@@ -30,7 +30,8 @@
 #define OPAQUE                0xffu
 
 /* enums */
-enum { SchemeNorm, SchemeSel, SchemeOut, SchemeLast }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeNormHighlight, SchemeSelHighlight,
+       SchemeOut, SchemeBorder, SchemeLast }; /* color schemes */
 
 struct item {
 	char *text;
@@ -152,9 +153,47 @@ cistrstr(const char *h, const char *n)
 	return NULL;
 }
 
+static void
+drawhighlights(struct item *item, int x, int y, int maxw)
+{
+	int i, indent;
+	char *highlight;
+	char c;
+
+	if (!(strlen(item->text) && strlen(text)))
+		return;
+
+	drw_setscheme(drw, scheme[item == sel
+	                   ? SchemeSelHighlight
+	                   : SchemeNormHighlight]);
+
+	for (i = 0, highlight = item->text; *highlight && text[i];) {
+		if (!fstrncmp(&text[i], highlight, 1)) {
+			c = highlight[1];
+			highlight[1] = '\0';
+
+			/* get indentation */
+			indent = TEXTW(item->text);
+
+			/* highlight character */
+			drw_text(
+				drw,
+				x + indent - lrpad + (border_padding/2) - 1,
+				y,
+				MIN(maxw - indent, TEXTW(highlight) - lrpad),
+				bh, 0, highlight, 0
+			);
+			highlight[1] = c;
+			i++;
+		}
+		highlight++;
+	}
+}
+
 static int
 drawitem(struct item *item, int x, int y, int w)
 {
+	int r;
 	if (item == sel)
 		drw_setscheme(drw, scheme[SchemeSel]);
 	else if (item->out)
@@ -162,7 +201,9 @@ drawitem(struct item *item, int x, int y, int w)
 	else
 		drw_setscheme(drw, scheme[SchemeNorm]);
 
-	return drw_text(drw, x, y, w, bh, lrpad / 2, item->text, 0);
+	r = drw_text(drw, x, y, w, bh, lrpad / 2, item->text, 0);
+	drawhighlights(item, x, y, w);
+	return r;
 }
 
 static void
@@ -170,48 +211,30 @@ drawmenu(void)
 {
 	unsigned int curpos;
 	struct item *item;
-	int x = 0, y = 0, w;
+	int x = 0, y = border_padding/2, w;
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
 
 	if (prompt && *prompt) {
 		drw_setscheme(drw, scheme[SchemeOut]);
-		x = drw_text(drw, x, 0, promptw, bh, lrpad / 2, prompt, 0);
+		x = drw_text(drw, x, y, promptw, bh, lrpad / 2, prompt, 0);
 	}
 	/* draw input field */
 	w = (lines > 0 || !matches) ? mw - x : inputw;
 	drw_setscheme(drw, scheme[SchemeOut]);
-	drw_text(drw, x, 0, w, bh, lrpad / 2, text, 0);
+	drw_text(drw, x, y, w, bh, lrpad / 2, text, 0);
 
 	curpos = TEXTW(text) - TEXTW(&text[cursor]);
 	if ((curpos += lrpad / 2 - 1) < w) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x + curpos, 2, 2, bh - 4, 1, 0);
+		drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
 	}
 
   y += prompt_offset;
-	if (lines > 0) {
-		/* draw vertical list */
-		for (item = curr; item != next; item = item->right)
-      drawitem(item, x - promptw, y += bh, mw);
-	} else if (matches) {
-		/* draw horizontal list */
-		x += inputw;
-		w = TEXTW("<");
-		if (curr->left) {
-			drw_setscheme(drw, scheme[SchemeNorm]);
-			drw_text(drw, x, 0, w, bh, lrpad / 2, "<", 0);
-		}
-		x += w;
-		for (item = curr; item != next; item = item->right)
-			x = drawitem(item, x, 0, textw_clamp(item->text, mw - x - TEXTW(">")));
-		if (next) {
-			w = TEXTW(">");
-			drw_setscheme(drw, scheme[SchemeNorm]);
-			drw_text(drw, mw - w, 0, w, bh, lrpad / 2, ">", 0);
-		}
-	}
+  /* draw vertical list */
+  for (item = curr; item != next; item = item->right)
+    drawitem(item, x - promptw, y += bh, mw);
 	drw_map(drw, win, 0, 0, mw, mh);
 }
 
@@ -367,8 +390,9 @@ match(void)
 			appenditem(item, &matches, &matchend);
 		else if (!fstrncmp(tokv[0], item->text, len))
 			appenditem(item, &lprefix, &prefixend);
-		else
-			appenditem(item, &lsubstr, &substrend);
+    // disable default fuzzy matching
+		//else
+			//appenditem(item, &lsubstr, &substrend);
 	}
 	if (lprefix) {
 		if (matches) {
@@ -863,7 +887,7 @@ setup(void)
 	bh = drw->fonts->h;
 	bh = user_bh ? bh + user_bh : bh + 2;
 	lines = MAX(lines, 0);
-	mh = (lines + 1) * bh + prompt_offset;
+	mh = (lines + 1) * bh + prompt_offset + border_padding;
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 #ifdef XINERAMA
 	i = 0;
@@ -920,8 +944,9 @@ setup(void)
 	win = XCreateWindow(dpy, root, x, y, mw, mh, border_width,
 	                    depth, CopyFromParent, visual,
 	                    CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &swa);
-	if (border_width)
-		XSetWindowBorder(dpy, win, scheme[SchemeNorm][ColBg].pixel);
+	if (border_width) {
+		XSetWindowBorder(dpy, win, scheme[SchemeBorder][ColBg].pixel);
+  }
 	XSetClassHint(dpy, win, &ch);
 
 
@@ -951,7 +976,8 @@ static void
 usage(void)
 {
 	die("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	    "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]");
+	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
+      "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
 
 int
@@ -991,6 +1017,14 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColBg] = argv[++i];
 		else if (!strcmp(argv[i], "-sf"))  /* selected foreground color */
 			colors[SchemeSel][ColFg] = argv[++i];
+		else if (!strcmp(argv[i], "-nhb")) /* normal hi background color */
+			colors[SchemeNormHighlight][ColBg] = argv[++i];
+		else if (!strcmp(argv[i], "-nhf")) /* normal hi foreground color */
+			colors[SchemeNormHighlight][ColFg] = argv[++i];
+		else if (!strcmp(argv[i], "-shb")) /* selected hi background color */
+			colors[SchemeSelHighlight][ColBg] = argv[++i];
+		else if (!strcmp(argv[i], "-shf")) /* selected hi foreground color */
+			colors[SchemeSelHighlight][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
 		else
@@ -1011,7 +1045,10 @@ main(int argc, char *argv[])
 	drw = drw_create(dpy, screen, root, wa.width, wa.height, visual, depth, cmap);
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
-	lrpad = drw->fonts->h;
+
+  lrpad = drw->fonts->h;
+  if (border_padding)
+    lrpad += border_padding;
 
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath", NULL) == -1)
