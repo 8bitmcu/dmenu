@@ -27,7 +27,7 @@ static const char *fonts[] = { "monospace:size=14" };
 /* -p  option; prompt to the left of input field */
 static const char *prompt = NULL;
 
-/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+/* if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
