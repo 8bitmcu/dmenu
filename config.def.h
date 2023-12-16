@@ -1,7 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
-/* -F  option; if 0, dmenu doesn't use fuzzy matching     */
+
+/* -F  option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 0;
+
+/* -M option; if 0, dmenu doesn't allow for multi selection */
+static int multiselect = 0;
 
 /* Minimum width of the window */
 static int min_width = 480;

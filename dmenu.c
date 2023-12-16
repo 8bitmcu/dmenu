@@ -538,20 +538,22 @@ keypress(XKeyEvent *ev)
 			goto draw;
 		case XK_Return:
 		case XK_KP_Enter:
-			if (sel && issel(sel->id)) {
-				for (int i = 0;i < selidsize;i++)
-					if (selid[i] == sel->id)
-						selid[i] = -1;
-			} else {
-				for (int i = 0;i < selidsize;i++)
-					if (selid[i] == -1) {
-						selid[i] = sel->id;
-						return;
-					}
-				selidsize++;
-				selid = realloc(selid, (selidsize + 1) * sizeof(int));
-				selid[selidsize - 1] = sel->id;
-			}
+      if(multiselect > 0) {
+        if (sel && issel(sel->id)) {
+          for (int i = 0;i < selidsize;i++)
+            if (selid[i] == sel->id)
+              selid[i] = -1;
+        } else {
+          for (int i = 0;i < selidsize;i++)
+            if (selid[i] == -1) {
+              selid[i] = sel->id;
+              return;
+            }
+          selidsize++;
+          selid = realloc(selid, (selidsize + 1) * sizeof(int));
+          selid[selidsize - 1] = sel->id;
+        }
+      }
 			break;
 		case XK_bracketleft:
 			cleanup();
@@ -754,14 +756,15 @@ buttonpress(XEvent *e)
 		return;
 	if (ev->state & ~ControlMask)
 		return;
-	if (lines > 0) {
-		/* vertical list: (ctrl)left-click on item */
-		w = mw - x;
-		for (item = curr; item != next; item = item->right) {
-			y += h;
-			if (ev->y >= y && ev->y <= (y + h)) {
-				sel = item;
-				if (sel) {
+
+  /* vertical list: (ctrl)left-click on item */
+  w = mw - x;
+  for (item = curr; item != next; item = item->right) {
+    y += h;
+    if (ev->y >= y && ev->y <= (y + h)) {
+      if(multiselect || !(ev->state & ControlMask)) {
+        sel = item;
+        if (sel) {
           if (sel && issel(sel->id)) {
             for (int i = 0;i < selidsize;i++)
               if (selid[i] == sel->id)
@@ -776,23 +779,23 @@ buttonpress(XEvent *e)
             selid = realloc(selid, (selidsize + 1) * sizeof(int));
             selid[selidsize - 1] = sel->id;
           }
-					drawmenu();
-				}
-				if (!(ev->state & ControlMask)) {
-          for (int i = 0;i < selidsize;i++)
-            if (selid[i] != -1 && (!sel || sel->id != selid[i]))
-              puts(items[selid[i]].text);
-          if (sel && !(ev->state & ShiftMask))
-            puts(sel->text);
-          else
-            puts(text);
-          cleanup();
-          exit(0);
+          drawmenu();
         }
-				return;
-			}
-		}
-	}
+      }
+      if (!(ev->state & ControlMask)) {
+        for (int i = 0;i < selidsize;i++)
+          if (selid[i] != -1 && (!sel || sel->id != selid[i]))
+            puts(items[selid[i]].text);
+        if (sel && !(ev->state & ShiftMask))
+          puts(sel->text);
+        else
+          puts(text);
+        cleanup();
+        exit(0);
+      }
+      return;
+    }
+  }
 }
 
 
@@ -1001,7 +1004,7 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfivP] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	die("usage: dmenu [-bfivPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
       "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
@@ -1021,6 +1024,10 @@ main(int argc, char *argv[])
 			fast = 1;
 		else if (!strcmp(argv[i], "-F"))   /* enable fuzzy matching */
 			fuzzy = 1;
+		else if (!strcmp(argv[i], "-P"))   /* is the input a password */
+			passwd = 1;
+		else if (!strcmp(argv[i], "-M"))   /* enables multiple selections */
+			multiselect = 1;
 		else if (!strcmp(argv[i], "-s")) { /* case-sensitive item matching */
 			fstrncmp = strncmp;
 			fstrstr = strstr;
@@ -1033,8 +1040,6 @@ main(int argc, char *argv[])
 			mon = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
 			prompt = argv[++i];
-		else if (!strcmp(argv[i], "-P"))   /* is the input a password */
-			passwd = 1;
 		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
 			fonts[0] = argv[++i];
 		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
@@ -1075,7 +1080,7 @@ main(int argc, char *argv[])
 		die("no fonts could be loaded.");
 
   lrpad = drw->fonts->h;
-  if (border_padding)
+  if (border_padding > 0)
     lrpad += border_padding;
 
 #ifdef __OpenBSD__

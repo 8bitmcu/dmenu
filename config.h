@@ -1,7 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
-/* -F  option; if 0, dmenu doesn't use fuzzy matching     */
+
+/* -F  option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 0;
+
+/* -M option; if 0, dmenu doesn't allow for multi selection */
+static int multiselect = 0;
 
 /* Minimum width of the window */
 static int min_width = 480;
@@ -27,7 +31,7 @@ static const char *fonts[] = { "monospace:size=14" };
 /* -p  option; prompt to the left of input field */
 static const char *prompt = NULL;
 
-/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+/* if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
