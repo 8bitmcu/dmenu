@@ -1,24 +1,23 @@
-dmenu - dynamic menu
-====================
-dmenu is an efficient dynamic menu for X.
+dmenu (fork)
+============
 
+This is a fork of the excellent suckless [dmenu](https://tools.suckless.org/dmenu).
+This fork merges the following patches: 
 
-Requirements
-------------
-In order to build dmenu you need the Xlib header files.
+- dmenu-alpha: adds transparency to the dmenu background
+- dmenu-bar-height: allows changing the height of individual items in the list
+- dmenu-border: adds a border around the dmenu prompt
+- dmenu-caseinsensitive: defaults to insensitive by default, unless -s is passed
+- dmenu-center: centers the dmenu prompt in the middle of the screen (always on)
+- dmenu-fuzzymatch: toggle fuzzy matching with the -F flag
+- dmenu-fuzzyhighlight: highlights matching results
+- dmenu-linebelowprompt-and-fullwidth: show menu entries bellow the prompt
+- dmenu-mousesupport: adds support for mouse 
+- dmenu-multiselect: multiple items can be selected with control+enter or control+click, using the -M flag
+- dmenu-password: hides the keyboard input and instead replaces it with a character, using the -P flag
+- dmenu_run_history: replaces dmenu_run so we always get history 
 
-
-Installation
-------------
-Edit config.mk to match your local setup (dmenu is installed into
-the /usr/local namespace by default).
-
-Afterwards enter the following command to build and install dmenu
-(if necessary as root):
-
-    make clean install
-
-
-Running dmenu
--------------
-See the man page for details.
+And adds the following other changes: 
+- always vertical/centered: there is no longer a horizontal mode
+- margin and padding: can be configured in `config.h`
+- prioritize history items over exact matches

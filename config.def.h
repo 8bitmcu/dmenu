@@ -16,8 +16,11 @@ static const int user_bh = 5;
 /* Window border */
 static const int border_width = 1;
 
-/* Padding between border and content */
-static const int border_padding = 20;
+/* Padding (inner) between border and content */
+static const int border_padding = 10;
+
+/* Margin (outer) between border and content */
+static const int border_margin = 25;
 
 /* amount of pixel between the prompt and other list items */
 static const unsigned int prompt_offset = 10; 
@@ -31,7 +34,7 @@ static const char *fonts[] = { "monospace:size=14" };
 /* -p  option; prompt to the left of input field */
 static const char *prompt = NULL;
 
-/* if nonzero, dmenu uses vertical list with given number of lines */
+/* dmenu uses vertical list with given number of lines */
 static unsigned int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
@@ -46,7 +49,7 @@ static const char *colors[SchemeLast][2] = {
 	/*     fg         bg       */
 	[SchemeNorm] = { "#bbbbbb", "#000000" },
 	[SchemeSel] = { "#000000", "#81a2be" },
-	[SchemeSelHighlight] = { "#000000", "#81a2be" },
+	[SchemeSelHighlight] = { "#ffffff", "#81a2be" },
 	[SchemeNormHighlight] = { "#ffffff", "#000000" },
 	[SchemeOut] = { "#ffffff", "#000000" },
 	[SchemeBorder] = { "#ffffff", "#ffffff" }

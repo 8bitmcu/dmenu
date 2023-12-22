@@ -185,12 +185,12 @@ drawhighlights(struct item *item, int x, int y, int maxw)
 			highlight[1] = '\0';
 
 			/* get indentation */
-			indent = TEXTW(item->text);
+			indent = TEXTW(item->text) + border_padding - 1;
 
 			/* highlight character */
 			drw_text(
 				drw,
-				x + indent - lrpad + (border_padding/2) - 1,
+				x + indent - lrpad,
 				y,
 				MIN(maxw - indent, TEXTW(highlight) - lrpad),
 				bh, 0, highlight, 0
@@ -223,7 +223,7 @@ drawmenu(void)
 {
 	unsigned int curpos;
 	struct item *item;
-	int x = 0, y = border_padding/2, w;
+	int x = border_margin, y = border_margin + border_padding, w;
 	char *censort;
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
@@ -240,12 +240,12 @@ drawmenu(void)
 	if (passwd) {
 	        censort = ecalloc(1, sizeof(text));
 		memset(censort, censor_char, strlen(text));
-		drw_text(drw, x, y, w, bh, lrpad / 2, censort, 0);
+		drw_text(drw, x, y, w, bh, 0, censort, 0);
 		free(censort);
-	} else drw_text(drw, x, y, w, bh, lrpad / 2, text, 0);
+	} else drw_text(drw, x, y, w, bh, 0, text, 0);
 
 	curpos = TEXTW(text) - TEXTW(&text[cursor]);
-	if ((curpos += lrpad / 2 - 1) < w) {
+	if (curpos < w) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
 	}
@@ -253,7 +253,7 @@ drawmenu(void)
   y += prompt_offset;
   /* draw vertical list */
   for (item = curr; item != next; item = item->right)
-    drawitem(item, x - promptw, y += bh, mw);
+    drawitem(item, x - promptw, y += bh, mw - (border_margin*2));
 	drw_map(drw, win, 0, 0, mw, mh);
 }
 
@@ -705,7 +705,8 @@ buttonpress(XEvent *e)
 {
 	struct item *item;
 	XButtonPressedEvent *ev = &e->xbutton;
-	int x = 0, y = border_padding/2+prompt_offset, h = bh, w;
+
+	int x = border_padding + border_margin, y = border_margin + border_padding + prompt_offset, h = bh, w;
 
 	if (ev->window != win)
 		return;
@@ -916,7 +917,7 @@ setup(void)
 	bh = drw->fonts->h;
 	bh = user_bh ? bh + user_bh : bh + 2;
 	lines = MAX(lines, 0);
-	mh = (lines + 1) * bh + prompt_offset + border_padding;
+	mh = (lines + 1) * bh + prompt_offset + (border_margin*2) + (border_padding*2);
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 #ifdef XINERAMA
 	i = 0;
@@ -963,6 +964,7 @@ setup(void)
 	inputw = mw / 3; /* input width: ~33% of monitor width */
 	match();
 
+
 	/* create menu window */
 	swa.override_redirect = True;
 	swa.background_pixel = 0;
@@ -1004,7 +1006,7 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfivPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	die("usage: dmenu [-bfvsPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
       "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
@@ -1080,8 +1082,10 @@ main(int argc, char *argv[])
 		die("no fonts could be loaded.");
 
   lrpad = drw->fonts->h;
-  if (border_padding > 0)
-    lrpad += border_padding;
+
+  if(border_padding > 0) {
+    lrpad += border_padding*2;
+  }
 
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath", NULL) == -1)
