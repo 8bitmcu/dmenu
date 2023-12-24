@@ -31,3 +31,7 @@ Building and installing
 2. Install libconfig from your package manager
 3. run `make && sudo make install` from within the same folder
 
+Preview
+=======
+
+![dmenu](dmenu.png)
