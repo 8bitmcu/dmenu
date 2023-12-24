@@ -18,6 +18,7 @@
 #endif
 #include <X11/extensions/Xrender.h>
 #include <X11/Xft/Xft.h>
+#include <libconfig.h>
 
 #include "drw.h"
 #include "util.h"
@@ -907,15 +908,17 @@ setup(void)
 	int a, di, n, area = 0;
 #endif
 	/* init appearance */
+
+  unsigned int alphas[2] = { OPAQUE, alpha };
 	for (j = 0; j < SchemeLast; j++)
-		scheme[j] = drw_scm_create(drw, colors[j], alphas[i], 2);
+		scheme[j] = drw_scm_create(drw, colors[j], alphas, 2);
 
 	clip = XInternAtom(dpy, "CLIPBOARD",   False);
 	utf8 = XInternAtom(dpy, "UTF8_STRING", False);
 
 	/* calculate menu geometry */
 	bh = drw->fonts->h;
-	bh = user_bh ? bh + user_bh : bh + 2;
+	bh = item_height ? bh + item_height : bh + 2;
 	lines = MAX(lines, 0);
 	mh = (lines + 1) * bh + prompt_offset + (border_margin*2) + (border_padding*2);
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
@@ -1017,6 +1020,95 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
+  config_t cfg;
+  const char *str;
+
+  config_init(&cfg);
+
+  const char *config_file = strcat(getenv("XDG_CONFIG_HOME"), dmenu_cfg);
+
+  // read from config file if it exists
+  if (config_read_file(&cfg, config_file)) {
+    if (config_lookup_int(&cfg, "fuzzy", &i)) {
+      fuzzy = i;
+    }
+    if (config_lookup_int(&cfg, "multiselect", &i)) {
+      multiselect = i;
+    }
+    if (config_lookup_int(&cfg, "min_width", &i)) {
+      min_width = i;
+    }
+    if (config_lookup_int(&cfg, "item_height", &i)) {
+      item_height = i;
+    }
+    if (config_lookup_int(&cfg, "border_width", &i)) {
+      border_width = i;
+    }
+    if (config_lookup_int(&cfg, "border_padding", &i)) {
+      border_padding = i;
+    }
+    if (config_lookup_int(&cfg, "border_margin", &i)) {
+      border_margin = i;
+    }
+    if (config_lookup_int(&cfg, "prompt_offset", &i)) {
+      prompt_offset = i;
+    }
+    if (config_lookup_int(&cfg, "alpha", &i)) {
+      alpha = i;
+    }
+    if (config_lookup_string(&cfg, "font", &str)) {
+      fonts[0] = strdup(str);
+    }
+    if (config_lookup_int(&cfg, "lines", &i)) {
+      lines = i;
+    }
+    if (config_lookup_string(&cfg, "censor_char", &str)) {
+      censor_char = str[0];
+    }
+    if (config_lookup_string(&cfg, "worddelimiters", &str)) {
+      worddelimiters = strdup(str);
+    } 
+    if (config_lookup_string(&cfg, "schemenorm_fg", &str)) {
+      colors[SchemeNorm][ColFg] = strdup(str);
+    } 
+    if (config_lookup_string(&cfg, "schemenorm_bg", &str)) {
+      colors[SchemeNorm][ColBg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemesel_fg", &str)) {
+      colors[SchemeSel][ColFg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemesel_bg", &str)) {
+      colors[SchemeSel][ColBg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeselhighlight_fg", &str)) {
+      colors[SchemeSelHighlight][ColFg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeselhighlight_bg", &str)) {
+      colors[SchemeSelHighlight][ColBg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeselnormhighlight_fg", &str)) {
+      colors[SchemeNormHighlight][ColFg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeselnormhighlight_bg", &str)) {
+      colors[SchemeNormHighlight][ColBg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeout_fg", &str)) {
+      colors[SchemeOut][ColFg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeout_bg", &str)) {
+      colors[SchemeOut][ColBg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeborder_fg", &str)) {
+      colors[SchemeBorder][ColFg] = strdup(str); 
+    } 
+    if (config_lookup_string(&cfg, "schemeborder_bg", &str)) {
+      colors[SchemeBorder][ColBg] = strdup(str); 
+    } 
+
+    config_destroy(&cfg);
+  }
+
+  // overwrite config with cmd line arguments 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */

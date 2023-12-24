@@ -1,6 +1,9 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
+/* configuration file location, subdirectory of XDG_CONFIG_HOME */
+static const char* dmenu_cfg = "/dmenu/dmenu.cfg";
+
 /* -F option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 0;
 
@@ -10,23 +13,23 @@ static int multiselect = 0;
 /* Minimum width of the window */
 static int min_width = 500;
 
-/* add an defined amount of pixels between items in list */
-static const int user_bh = 5;
+/* up/down padding on line-items */
+static int item_height = 5;
 
 /* Window border */
-static const int border_width = 1;
+static int border_width = 1;
 
 /* Padding (inner) between border and content */
-static const int border_padding = 10;
+static int border_padding = 10;
 
 /* Margin (outer) between border and content */
-static const int border_margin = 25;
+static int border_margin = 25;
 
 /* amount of pixel between the prompt and other list items */
-static const unsigned int prompt_offset = 10; 
+static unsigned int prompt_offset = 10; 
 
 /* Amount of opacity. 0xff is opaque */
-static const unsigned int alpha = 0xcc;
+static unsigned int alpha = 0xcc;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = { "monospace:size=14" };
@@ -38,7 +41,7 @@ static const char *prompt = NULL;
 static unsigned int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
-static const char censor_char = '*';
+static char censor_char = '*';
 /*
  * Characters not considered part of a word while deleting words
  * for example: " /?\"&[]"
@@ -54,13 +57,3 @@ static const char *colors[SchemeLast][2] = {
 	[SchemeOut] = { "#ffffff", "#000000" },
 	[SchemeBorder] = { "#ffffff", "#ffffff" }
 };
-
-static const unsigned int alphas[SchemeLast][2] = {
-	[SchemeNorm] = { OPAQUE, alpha },
-	[SchemeSel] = { OPAQUE, alpha },
-	[SchemeSelHighlight] = { OPAQUE, alpha },
-	[SchemeNormHighlight] = { OPAQUE, alpha },
-	[SchemeOut] = { OPAQUE, alpha },
-	[SchemeBorder] = { OPAQUE, alpha }
-};
-
