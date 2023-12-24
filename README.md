@@ -1,8 +1,7 @@
 dmenu (fork)
 ============
 
-This is a fork of the excellent suckless [dmenu](https://tools.suckless.org/dmenu)
-This fork merges the following patches: 
+This is a fork of the suckless [dmenu](https://tools.suckless.org/dmenu). This fork merges the following patches: 
 
 - dmenu-alpha: adds transparency to the dmenu background
 - dmenu-bar-height: allows changing the height of individual items in the list
@@ -27,7 +26,7 @@ And adds the following other changes:
 Building and installing
 =======================
 
-1. clone to repository locally on your machine
+1. clone this repository locally on your machine
 2. Install libconfig from your package manager
-3. run `make && sudo make install` from within the same folder
-
+3. run `make && sudo make install` from within the repository folder
+4. copy and edit the config file: `cp /etc/dmenu/dmenu.cfg $XDG_CONFIG_HOME/dmenu/dmenu.cfg`

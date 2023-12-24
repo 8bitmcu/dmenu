@@ -4,6 +4,9 @@
 /* configuration file location, subdirectory of XDG_CONFIG_HOME */
 static const char* dmenu_cfg = "/dmenu/dmenu.cfg";
 
+/* -i option; if 0, dmenu doesn't show caret & input box */ 
+static int input = 1;
+
 /* -F option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 0;
 
@@ -46,7 +49,7 @@ static char censor_char = '*';
  * Characters not considered part of a word while deleting words
  * for example: " /?\"&[]"
  */
-static const char worddelimiters[] = " ";
+static const char *worddelimiters = " ";
 
 static const char *colors[SchemeLast][2] = {
 	/*     fg         bg       */

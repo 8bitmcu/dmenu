@@ -243,13 +243,16 @@ drawmenu(void)
 		memset(censort, censor_char, strlen(text));
 		drw_text(drw, x, y, w, bh, 0, censort, 0);
 		free(censort);
-	} else drw_text(drw, x, y, w, bh, 0, text, 0);
+	} else if (input)
+    drw_text(drw, x, y, w, bh, 0, text, 0);
 
-	curpos = TEXTW(text) - TEXTW(&text[cursor]);
-	if (curpos < w) {
-		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
-	}
+  if (input) {
+    curpos = TEXTW(text) - TEXTW(&text[cursor]);
+    if (curpos < w) {
+      drw_setscheme(drw, scheme[SchemeNorm]);
+      drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
+    }
+  }
 
   y += prompt_offset;
   /* draw vertical list */
@@ -437,6 +440,9 @@ match(void)
 static void
 insert(const char *str, ssize_t n)
 {
+  if (!input)
+    return;
+
 	if (strlen(text) + n > sizeof text - 1)
 		return;
 	/* move existing text out of the way, insert new text, and update cursor */
@@ -1009,7 +1015,7 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfvsPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	die("usage: dmenu [-bfvsiPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
       "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
@@ -1125,7 +1131,9 @@ main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-s")) { /* case-sensitive item matching */
 			fstrncmp = strncmp;
 			fstrstr = strstr;
-		} else if (i + 1 == argc)
+    } else if (!strcmp(argv[i], "-i")) /* input-less */
+      input = 0;
+		else if (i + 1 == argc)
 			usage();
 		/* these options take one argument */
 		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */

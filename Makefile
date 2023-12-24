@@ -33,7 +33,7 @@ clean:
 
 dist: clean
 	mkdir -p dmenu-$(VERSION)
-	cp LICENSE Makefile README arg.h config.def.h config.mk dmenu.1\
+	cp LICENSE Makefile README.md arg.h config.def.h config.mk config.cfg dmenu.1\
 		drw.h util.h dmenu_path dmenu_run stest.1 $(SRC)\
 		dmenu-$(VERSION)
 	tar -cf dmenu-$(VERSION).tar dmenu-$(VERSION)
@@ -52,6 +52,8 @@ install: all
 	sed "s/VERSION/$(VERSION)/g" < stest.1 > $(DESTDIR)$(MANPREFIX)/man1/stest.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/dmenu.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/stest.1
+	mkdir -p /etc/dmenu 
+	cp -f dmenu.cfg /etc/dmenu
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/dmenu\
@@ -59,6 +61,7 @@ uninstall:
 		$(DESTDIR)$(PREFIX)/bin/dmenu_run\
 		$(DESTDIR)$(PREFIX)/bin/stest\
 		$(DESTDIR)$(MANPREFIX)/man1/dmenu.1\
-		$(DESTDIR)$(MANPREFIX)/man1/stest.1
+		$(DESTDIR)$(MANPREFIX)/man1/stest.1 \
+		/etc/dmemu/dmenu.cfg
 
 .PHONY: all options clean dist install uninstall
