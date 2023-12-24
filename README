@@ -22,3 +22,11 @@ And adds the following other changes:
 - margin and padding: can be configured in `config.h`
 - prioritize history items over exact matches
 - using libconfig to loads configuration from $XDG_CONFIG_HOME/dmenu/dmenu.cfg if it exists
+
+
+Building and installing
+=======================
+
+1. clone to repository locally on your machine
+2. Install libconfig from your package manager
+3. run `make && sudo make install` from within the same folder
