@@ -28,5 +28,14 @@ Building and installing
 
 1. clone this repository locally on your machine
 2. Install libconfig from your package manager
+<<<<<<< HEAD
 3. run `make && sudo make install` from within the repository folder
 4. copy and edit the config file: `cp /etc/dmenu/dmenu.cfg $XDG_CONFIG_HOME/dmenu/dmenu.cfg`
+=======
+3. run `make && sudo make install` from within the same folder
+
+Preview
+=======
+
+![dmenu](dmenu.png)
+>>>>>>> 1dd0b4e393a993f6998d2103f0c7146c79a15e15
