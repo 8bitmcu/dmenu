@@ -1,7 +1,7 @@
 dmenu (fork)
 ============
 
-This is a fork of the excellent suckless dmenu, see: https://tools.suckless.org/dmenu
+This is a fork of the excellent suckless [dmenu](https://tools.suckless.org/dmenu)
 This fork merges the following patches: 
 
 - dmenu-alpha: adds transparency to the dmenu background
@@ -21,7 +21,7 @@ And adds the following other changes:
 - always vertical/centered: there is no longer a horizontal mode
 - margin and padding: can be configured in `config.h`
 - prioritize history items over exact matches
-- using libconfig to loads configuration from $XDG_CONFIG_HOME/dmenu/dmenu.cfg if it exists
+- using libconfig to loads configuration from `$XDG_CONFIG_HOME/dmenu/dmenu.cfg` if it exists
 
 
 Building and installing
@@ -30,3 +30,4 @@ Building and installing
 1. clone to repository locally on your machine
 2. Install libconfig from your package manager
 3. run `make && sudo make install` from within the same folder
+
