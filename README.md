@@ -1,52 +1,71 @@
 dmenu (fork)
 ============
 
-This is a fork of the suckless [dmenu](https://tools.suckless.org/dmenu). This fork merges the following patches: 
+A bloated fork of suckless [dmenu](https://tools.suckless.org/dmenu) with lots of customizations.
 
-- dmenu-alpha: adds transparency to the dmenu background
-- dmenu-bar-height: allows changing the height of individual items in the list
-- dmenu-border: adds a border around the dmenu prompt
-- dmenu-caseinsensitive: defaults to insensitive by default, unless -s is passed
-- dmenu-center: centers the dmenu prompt in the middle of the screen (always on)
-- dmenu-fuzzymatch: toggle fuzzy matching with the -F flag
-- dmenu-fuzzyhighlight: highlights matching results
-- dmenu-linebelowprompt-and-fullwidth: show menu entries bellow the prompt
-- dmenu-mousesupport: adds support for mouse 
-- dmenu-multiselect: multiple items can be selected with control+enter or control+click, using the -M flag
-- dmenu-password: hides the keyboard input and instead replaces it with a character, using the -P flag
-- dmenu-numbers: show the total number of matches over the total number of items in the up-right corner, using the -n flag
-- dmenu-printindex: gives dmenu the ability to print the index of matched text, using the -ix flag
-- dmenu_run_history: replaces dmenu_run so we always get history 
+This fork merges the following patches: 
+
+- [dmenu-alpha](https://tools.suckless.org/dmenu/patches/alpha/): adds transparency
+- [dmenu-bar-height](https://tools.suckless.org/dmenu/patches/bar_height/): changes height of items
+- [dmenu-border](https://tools.suckless.org/dmenu/patches/border/): adds a border
+- [dmenu-caseinsensitive](https://tools.suckless.org/dmenu/patches/case-insensitive/): adds case-sensitivity
+- [dmenu-center](https://tools.suckless.org/dmenu/patches/center/): centers dmenu
+- [dmenu-fuzzymatch](https://tools.suckless.org/dmenu/patches/fuzzymatch/): fuzzy matching
+- [dmenu-fuzzyhighlight](https://tools.suckless.org/dmenu/patches/fuzzyhighlight/): highlights matching results
+- [dmenu-initialtext](https://tools.suckless.org/dmenu/patches/initialtext/): starts dmenu with user input
+- [dmenu-linebelowprompt-and-fullwidth](https://tools.suckless.org/dmenu/patches/lines-below-prompt/): show entries below prompt
+- [dmenu-mousesupport](https://tools.suckless.org/dmenu/patches/mouse-support/): mouse support
+- [dmenu-multiselect](https://tools.suckless.org/dmenu/patches/multi-selection/): allows multiple items to be selected
+- [dmenu-numbers](https://tools.suckless.org/dmenu/patches/numbers/): show number of matches/items
+- [dmenu-password](https://tools.suckless.org/dmenu/patches/password/): hides keyboard input with characters
+- [dmenu-printindex](https://tools.suckless.org/dmenu/patches/printindex/): prints index of item instead of item
+- [dmenu_run_history](https://tools.suckless.org/dmenu/scripts/dmenu_run_with_command_history/): dmenu_run with history
 
 And adds the following other changes: 
-- always vertical/centered: there is no longer a horizontal mode
-- using libconfig to loads configuration from `$XDG_CONFIG_HOME/dmenu/dmenu.cfg` if it exists
-- margin and padding: can be configured in `config.h` or `dmenu.cfg`
-- inputless mode using the -i flag
-- prioritize history items over exact matches
-- faster width calculation for faster rendering of large files (100k+ lines)
-- minimum width can be specified with the -W flag
+
+- **always vertical/centered**; there is no longer a horizontal mode
+- **configuration file**; using libconfig to loads configuration from `$XDG_CONFIG_HOME/dmenu/dmenu.cfg` if it exists
+- **margin and padding**; can be configured in `config.h` or `dmenu.cfg`
+- **inputless mode** using the -i flag
+- **prioritize history** items over exact matches
+- **faster** width calculation of large files
+- **minimum width** can be specified with the -W flag
 
 Building and installing
 -----------------------
 
 1. clone this repository locally on your machine
 2. Install libconfig from your package manager
-3. run `make && sudo make install` from within the repository folder
+3. run `make clean && sudo make install` from within the repository folder
 4. copy and edit the config file: `cp /etc/dmenu/dmenu.cfg $XDG_CONFIG_HOME/dmenu/dmenu.cfg`
 
 Previews
 --------
 
+
+### dmenu_run with history, which prioritize history items over exact matches 
 `dmenu_run`
 
 ![dmenu](assets/dmenu_launch.png)
 
+***
+
+
+
+
+### dmenu as a password prompt
 `dmenu -p "Enter password:" -P -W 300`
 
 ![dmenu](assets/dmenu_password.jpg)
 
+***
+
+
+
+
+### dmenu as a confirmation dialog; with input disabled
 `echo "OK" | dmenu -p "Confirm this dialog" -i -W 0`
 
 ![dmenu](assets/dmenu_dialog.jpg)
 
+***

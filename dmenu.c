@@ -1068,7 +1068,8 @@ usage(void)
 {
 	die("usage: dmenu [-bfvsinPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
-      "           [-nf color] [-sb color] [-sf color] [-w windowid]");
+      "           [-nf color] [-sb color] [-sf color] [-w windowid] [-it text ]\n"
+      "           [-W width]");
 }
 
 int
@@ -1198,6 +1199,10 @@ main(int argc, char *argv[])
 			embed = argv[++i];
 		else if (!strcmp(argv[i], "-W"))   /* overwrite minimum width */
       min_width = atoi(argv[++i]);
+    else if (!strcmp(argv[i], "-it")) {   /* initial text */
+			const char * text = argv[++i];
+			insert(text, strlen(text));
+		} 
 		else
 			usage();
 
