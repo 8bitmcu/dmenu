@@ -4,6 +4,9 @@
 /* configuration file location, subdirectory of XDG_CONFIG_HOME */
 static const char* dmenu_cfg = "/dmenu/dmenu.cfg";
 
+/* -ix option; if 1 dmenu will print the index instead of the item */ 
+static int print_index = 0;
+
 /* -i option; if 0, dmenu doesn't show caret & input box */ 
 static int input = 1;
 

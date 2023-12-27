@@ -1196,6 +1196,8 @@ main(int argc, char *argv[])
 			colors[SchemeSelHighlight][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-W"))   /* overwrite minimum width */
+      min_width = atoi(argv[++i]);
 		else
 			usage();
 

@@ -3,7 +3,7 @@
 dmenu \- dynamic menu
 .SH SYNOPSIS
 .B dmenu
-.RB [ \-bfvsinPM ]
+.RB [ \-bfvsinPMW ]
 .RB [ \-m
 .IR monitor ]
 .RB [ \-p
@@ -61,7 +61,7 @@ defines the prompt to be displayed to the left of the input field.
 dmenu will enable case sensitive matching.
 .TP
 .B \-i
-dmenu will hide carret and will refuse text input
+dmenu will hide carret and will refuse text input.
 .TP
 .B \-ix
 dmenu prints the index of matched text instead of the text itself.
@@ -70,10 +70,13 @@ dmenu prints the index of matched text instead of the text itself.
 dmenu will not directly display the keyboard input, but instead replace it with dots. All data from stdin will be ignored.
 .TP
 .B \-n
-dmenu will show matching item numbers over the total number of items
+dmenu will show matching item numbers over the total number of items.
 .TP
 .B \-M
 dmenu will allow for multi selection.
+.TP
+.B \-W
+overwrites the minimum width of the dmenu prompt.
 .TP
 .BI \-fn " font"
 defines the font or font set used.

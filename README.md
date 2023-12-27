@@ -15,6 +15,7 @@ This is a fork of the suckless [dmenu](https://tools.suckless.org/dmenu). This f
 - dmenu-multiselect: multiple items can be selected with control+enter or control+click, using the -M flag
 - dmenu-password: hides the keyboard input and instead replaces it with a character, using the -P flag
 - dmenu-numbers: show the total number of matches over the total number of items in the up-right corner, using the -n flag
+- dmenu-printindex: gives dmenu the ability to print the index of matched text, using the -ix flag
 - dmenu_run_history: replaces dmenu_run so we always get history 
 
 And adds the following other changes: 
@@ -23,17 +24,26 @@ And adds the following other changes:
 - margin and padding: can be configured in `config.h` or `dmenu.cfg`
 - inputless mode using the -i flag
 - prioritize history items over exact matches
-
+- faster width calculation for faster rendering of large files (100k+ lines)
+- minimum width can be specified with the -W flag
 
 Building and installing
-=======================
+-----------------------
 
 1. clone this repository locally on your machine
 2. Install libconfig from your package manager
 3. run `make && sudo make install` from within the repository folder
 4. copy and edit the config file: `cp /etc/dmenu/dmenu.cfg $XDG_CONFIG_HOME/dmenu/dmenu.cfg`
 
-Preview
-=======
+Previews
+--------
 
-![dmenu](dmenu.png)
+`dmenu_run`
+![dmenu](assets/dmenu_launch.png)
+
+`dmenu -p "Enter password:" -P -W 300`
+![dmenu](assets/dmenu_password.jpg)
+
+`echo "OK" | dmenu -p "Confirm this dialog" -i -W 0`
+![dmenu](assets/dmenu_dialog.jpg)
+
