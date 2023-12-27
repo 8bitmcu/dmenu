@@ -52,7 +52,6 @@ Previews
 
 
 
-
 ### dmenu as a password prompt
 `dmenu -p "Enter password:" -P -W 300`
 
@@ -62,10 +61,15 @@ Previews
 
 
 
-
 ### dmenu as a confirmation dialog; with input disabled
 `echo "OK" | dmenu -p "Confirm this dialog" -i -W 0`
 
 ![dmenu](assets/dmenu_dialog.jpg)
 
 ***
+
+
+
+### Edit dotfiles; fuzzy matching enabled & numbers displayed
+`select=$(find ~ -type f | dmenu -F -n -p "~") && [[ -n $select ]] && $TERMINAL -e $EDITOR $select`
+![dmenu](assets/dmenu_editor.jpg)
