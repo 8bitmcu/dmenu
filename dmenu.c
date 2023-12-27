@@ -108,10 +108,8 @@ calcoffsets(void)
 {
 	int i, n;
 
-	if (lines > 0)
-		n = lines * bh;
-	else
-		n = mw - (promptw + inputw + TEXTW("<") + TEXTW(">"));
+  n = lines * bh;
+
 	/* calculate which items will begin the next page and previous page */
 	for (i = 0, next = curr; next; next = next->right)
 		if ((i += (lines > 0) ? bh : textw_clamp(next->text, n)) > n)
@@ -124,10 +122,23 @@ calcoffsets(void)
 static int
 max_textw(void)
 {
-	int len = 0;
-	for (struct item *item = items; item && item->text; item++)
-		len = MAX(TEXTW(item->text), len);
-	return len;
+
+  if(!items) 
+    return min_width;
+
+  // Max text length is based on the list item with the most characters
+  // This is fine for monospaced fonts, but not regular fonts
+  // But it is sooo much, much faster (especially on larger files)
+	struct item *max = NULL;
+  int maxl = 0;
+
+	for (struct item *item = items; item && item->text; item++) {
+    if (strlen(item->text) > maxl) {
+      max = item;
+      maxl = strlen(item->text);
+    }
+  }
+	return TEXTW(max->text);
 }
 
 
@@ -320,6 +331,7 @@ fuzzymatch(void)
 					if (pidx == text_len) {
 						eidx = i;
 						break;
+
 					}
 				}
 			}
@@ -833,8 +845,8 @@ readstdin(void)
 	ssize_t len;
 
 	if(passwd){
-    	inputw = lines = 0;
-    	return;
+    inputw = lines = 0;
+    return;
  	}
 
 	/* read each line from stdin and add it to the item list */
@@ -1035,81 +1047,56 @@ main(int argc, char *argv[])
 
   // read from config file if it exists
   if (config_read_file(&cfg, config_file)) {
-    if (config_lookup_int(&cfg, "fuzzy", &i)) {
+    if (config_lookup_int(&cfg, "fuzzy", &i))
       fuzzy = i;
-    }
-    if (config_lookup_int(&cfg, "multiselect", &i)) {
+    if (config_lookup_int(&cfg, "multiselect", &i))
       multiselect = i;
-    }
-    if (config_lookup_int(&cfg, "min_width", &i)) {
+    if (config_lookup_int(&cfg, "min_width", &i))
       min_width = i;
-    }
-    if (config_lookup_int(&cfg, "item_height", &i)) {
+    if (config_lookup_int(&cfg, "item_height", &i))
       item_height = i;
-    }
-    if (config_lookup_int(&cfg, "border_width", &i)) {
+    if (config_lookup_int(&cfg, "border_width", &i))
       border_width = i;
-    }
-    if (config_lookup_int(&cfg, "border_padding", &i)) {
+    if (config_lookup_int(&cfg, "border_padding", &i))
       border_padding = i;
-    }
-    if (config_lookup_int(&cfg, "border_margin", &i)) {
+    if (config_lookup_int(&cfg, "border_margin", &i))
       border_margin = i;
-    }
-    if (config_lookup_int(&cfg, "prompt_offset", &i)) {
+    if (config_lookup_int(&cfg, "prompt_offset", &i))
       prompt_offset = i;
-    }
-    if (config_lookup_int(&cfg, "alpha", &i)) {
+    if (config_lookup_int(&cfg, "alpha", &i))
       alpha = i;
-    }
-    if (config_lookup_string(&cfg, "font", &str)) {
+    if (config_lookup_string(&cfg, "font", &str))
       fonts[0] = strdup(str);
-    }
-    if (config_lookup_int(&cfg, "lines", &i)) {
+    if (config_lookup_int(&cfg, "lines", &i))
       lines = i;
-    }
-    if (config_lookup_string(&cfg, "censor_char", &str)) {
+    if (config_lookup_string(&cfg, "censor_char", &str))
       censor_char = str[0];
-    }
-    if (config_lookup_string(&cfg, "worddelimiters", &str)) {
+    if (config_lookup_string(&cfg, "worddelimiters", &str))
       worddelimiters = strdup(str);
-    } 
-    if (config_lookup_string(&cfg, "schemenorm_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemenorm_fg", &str))
       colors[SchemeNorm][ColFg] = strdup(str);
-    } 
-    if (config_lookup_string(&cfg, "schemenorm_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemenorm_bg", &str))
       colors[SchemeNorm][ColBg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemesel_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemesel_fg", &str))
       colors[SchemeSel][ColFg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemesel_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemesel_bg", &str))
       colors[SchemeSel][ColBg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeselhighlight_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemeselhighlight_fg", &str))
       colors[SchemeSelHighlight][ColFg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeselhighlight_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemeselhighlight_bg", &str))
       colors[SchemeSelHighlight][ColBg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeselnormhighlight_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemeselnormhighlight_fg", &str))
       colors[SchemeNormHighlight][ColFg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeselnormhighlight_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemeselnormhighlight_bg", &str))
       colors[SchemeNormHighlight][ColBg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeout_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemeout_fg", &str))
       colors[SchemeOut][ColFg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeout_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemeout_bg", &str))
       colors[SchemeOut][ColBg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeborder_fg", &str)) {
+    if (config_lookup_string(&cfg, "schemeborder_fg", &str))
       colors[SchemeBorder][ColFg] = strdup(str); 
-    } 
-    if (config_lookup_string(&cfg, "schemeborder_bg", &str)) {
+    if (config_lookup_string(&cfg, "schemeborder_bg", &str))
       colors[SchemeBorder][ColBg] = strdup(str); 
-    } 
 
     config_destroy(&cfg);
   }
@@ -1182,7 +1169,6 @@ main(int argc, char *argv[])
 		die("no fonts could be loaded.");
 
   lrpad = drw->fonts->h;
-
   if(border_padding > 0) {
     lrpad += border_padding*2;
   }
