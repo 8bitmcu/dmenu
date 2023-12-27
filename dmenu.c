@@ -714,13 +714,16 @@ insert:
 	case XK_Return:
 	case XK_KP_Enter:
 		if (!(ev->state & ControlMask)) {
+      /* multi-select items */
 			for (int i = 0;i < selidsize;i++)
 				if (selid[i] != -1 && (!sel || sel->id != selid[i]))
-					puts(items[selid[i]].text);
+          print_index ? printf("%d\n", items[selid[i]].id) : puts(items[selid[i]].text);
+      /* item that is currently under selection */
 			if (sel && !(ev->state & ShiftMask))
-				puts(sel->text);
+        print_index ? printf("%d\n", sel->id) : puts(sel->text);
 			else
-				puts(text);
+        /* input from the textbox */ 
+				puts(print_index ? "-1" : text);
 			cleanup();
 			exit(0);
 		}
@@ -1089,6 +1092,8 @@ main(int argc, char *argv[])
       multiselect = i;
     if (config_lookup_int(&cfg, "min_width", &i))
       min_width = i;
+    if (config_lookup_int(&cfg, "print_index", &i))
+      print_index = i;
     if (config_lookup_int(&cfg, "show_numbers", &i))
       show_numbers = i;
     if (config_lookup_int(&cfg, "item_height", &i))
@@ -1160,6 +1165,8 @@ main(int argc, char *argv[])
 			fstrstr = strstr;
     } else if (!strcmp(argv[i], "-i")) /* input-less */
       input = 0;
+		else if (!strcmp(argv[i], "-ix"))  /* adds ability to return index in list */
+			print_index = 1;
 		else if (i + 1 == argc)
 			usage();
 		/* these options take one argument */

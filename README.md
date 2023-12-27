@@ -14,6 +14,7 @@ This is a fork of the suckless [dmenu](https://tools.suckless.org/dmenu). This f
 - dmenu-mousesupport: adds support for mouse 
 - dmenu-multiselect: multiple items can be selected with control+enter or control+click, using the -M flag
 - dmenu-password: hides the keyboard input and instead replaces it with a character, using the -P flag
+- dmenu-numbers: show the total number of matches over the total number of items in the up-right corner, using the -n flag
 - dmenu_run_history: replaces dmenu_run so we always get history 
 
 And adds the following other changes: 
