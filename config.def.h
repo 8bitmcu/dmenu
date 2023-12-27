@@ -19,6 +19,9 @@ static int min_width = 500;
 /* up/down padding on line-items */
 static int item_height = 5;
 
+/* -n option; if 1 show number of matches over the number of items */
+static int show_numbers = 0;
+
 /* Window border */
 static int border_width = 1;
 

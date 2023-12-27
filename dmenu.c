@@ -30,6 +30,9 @@
 
 #define OPAQUE                0xffu
 
+#define NUMBERSMAXDIGITS      100
+#define NUMBERSBUFSIZE        (NUMBERSMAXDIGITS * 2) + 1
+
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeNormHighlight, SchemeSelHighlight,
        SchemeOut, SchemeBorder, SchemeLast }; /* color schemes */
@@ -41,6 +44,7 @@ struct item {
 	double distance;
 };
 
+static char numbers[NUMBERSBUFSIZE] = "";
 static char text[BUFSIZ] = "";
 static char *embed;
 static int bh, mw, mh;
@@ -231,6 +235,24 @@ drawitem(struct item *item, int x, int y, int w)
 }
 
 static void
+recalculatenumbers()
+{
+  if (!show_numbers) 
+    return;
+
+	unsigned int numer = 0, denom = 0;
+	struct item *item;
+	if (matchend) {
+		numer++;
+		for (item = matchend; item && item->left; item = item->left)
+			numer++;
+	}
+	for (item = items; item && item->text; item++)
+		denom++;
+	snprintf(numbers, NUMBERSBUFSIZE, "%d/%d", numer, denom);
+}
+
+static void
 drawmenu(void)
 {
 	unsigned int curpos;
@@ -238,17 +260,22 @@ drawmenu(void)
 	int x = border_margin, y = border_margin + border_padding, w;
 	char *censort;
 
+  recalculatenumbers();
+
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
 
+  /* draw prompt */
 	if (prompt && *prompt) {
 		drw_setscheme(drw, scheme[SchemeOut]);
 		x = drw_text(drw, x, y, promptw, bh, lrpad / 2, prompt, 0);
 	}
+
 	/* draw input field */
-	w = (lines > 0 || !matches) ? mw - x : inputw;
+	w = ((lines > 0 || !matches) ? mw - x : inputw) - TEXTW(numbers);
 	drw_setscheme(drw, scheme[SchemeOut]);
 
+  /* draw censor_char if passwd, otherwise draw user input */
 	if (passwd) {
 	        censort = ecalloc(1, sizeof(text));
 		memset(censort, censor_char, strlen(text));
@@ -257,6 +284,7 @@ drawmenu(void)
 	} else if (input)
     drw_text(drw, x, y, w, bh, 0, text, 0);
 
+  /* draw caret */
   if (input) {
     curpos = TEXTW(text) - TEXTW(&text[cursor]);
     if (curpos < w) {
@@ -265,10 +293,18 @@ drawmenu(void)
     }
   }
 
+  /* draw numbers */
+  if (show_numbers) {
+    drw_setscheme(drw, scheme[SchemeNorm]);
+    drw_text(drw, mw - TEXTW(numbers) - border_margin, y, TEXTW(numbers), bh, lrpad / 2, numbers, 0);
+  }
+
   y += prompt_offset;
   /* draw vertical list */
   for (item = curr; item != next; item = item->right)
     drawitem(item, x - promptw, y += bh, mw - (border_margin*2));
+
+
 	drw_map(drw, win, 0, 0, mw, mh);
 }
 
@@ -1027,7 +1063,7 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfvsiPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	die("usage: dmenu [-bfvsinPM] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
 	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
       "           [-nf color] [-sb color] [-sf color] [-w windowid]");
 }
@@ -1053,6 +1089,8 @@ main(int argc, char *argv[])
       multiselect = i;
     if (config_lookup_int(&cfg, "min_width", &i))
       min_width = i;
+    if (config_lookup_int(&cfg, "show_numbers", &i))
+      show_numbers = i;
     if (config_lookup_int(&cfg, "item_height", &i))
       item_height = i;
     if (config_lookup_int(&cfg, "border_width", &i))
@@ -1115,6 +1153,8 @@ main(int argc, char *argv[])
 			passwd = 1;
 		else if (!strcmp(argv[i], "-M"))   /* enables multiple selections */
 			multiselect = 1;
+		else if (!strcmp(argv[i], "-n"))   /* show number of lines */
+			show_numbers = 1;
 		else if (!strcmp(argv[i], "-s")) { /* case-sensitive item matching */
 			fstrncmp = strncmp;
 			fstrstr = strstr;

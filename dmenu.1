@@ -3,7 +3,7 @@
 dmenu \- dynamic menu
 .SH SYNOPSIS
 .B dmenu
-.RB [ \-bfvsiPM ]
+.RB [ \-bfvsinPM ]
 .RB [ \-m
 .IR monitor ]
 .RB [ \-p
@@ -65,6 +65,9 @@ dmenu will hide carret and will refuse text input
 .TP
 .B \-P
 dmenu will not directly display the keyboard input, but instead replace it with dots. All data from stdin will be ignored.
+.TP
+.B \-n
+dmenu will show matching item numbers over the total number of items
 .TP
 .B \-M
 dmenu will allow for multi selection.
