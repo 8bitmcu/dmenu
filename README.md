@@ -39,11 +39,14 @@ Previews
 --------
 
 `dmenu_run`
+
 ![dmenu](assets/dmenu_launch.png)
 
 `dmenu -p "Enter password:" -P -W 300`
+
 ![dmenu](assets/dmenu_password.jpg)
 
 `echo "OK" | dmenu -p "Confirm this dialog" -i -W 0`
+
 ![dmenu](assets/dmenu_dialog.jpg)
 
