@@ -2,7 +2,7 @@
 /* Default settings; can be overriden by command line. */
 
 /* configuration file location, subdirectory of XDG_CONFIG_HOME */
-static const char* dmenu_cfg = "/dmenu/dmenu.cfg";
+static const char* dmenu_cfg = "/dmenu/dmenu.toml";
 
 /* -ix option; if 1 dmenu will print the index instead of the item */ 
 static int print_index = 0;

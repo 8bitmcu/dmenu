@@ -1,0 +1,84 @@
+#########################
+### Window properties ###
+#########################
+
+# minimum width of the window, in pixels
+min_width = 500
+
+# border width, in pixels
+border_width = 1
+
+# border margin (outer), in pixels
+border_margin = 25
+
+# border padding (inner), in pixels
+border_padding = 10
+
+###################
+### Appearences ###
+###################
+
+# vertical margin between prompt and list items, in pixels
+prompt_offset = 10
+
+# height of each items in the list
+item_height = 5
+
+# number of items to be displayed per page
+lines = 15
+
+# opacity, from 0-255 transparent-opaque
+alpha = 204
+
+# Xft font to use
+font = "Terminus:size=14"
+
+##############
+### Colors ###
+##############
+
+# normal list item
+schemenorm_fg = "#bbbbbb"
+schemenorm_bg = "#000000"
+
+# selected item
+schemesel_fg = "#000000"
+schemesel_bg = "#81a2be"
+
+# selected and highlighted item
+schemeselhighlight_fg = "#ffffff"
+schemeselhighlight_bg = "#81a2be"
+
+# normal list item highlighted
+schemenormhighlight_fg = "#ffffff"
+schemenormhighlight_bg = "#000000"
+
+# prompt, input text
+schemeout_fg = "#ffffff"
+schemeout_bg = "#000000"
+
+# window border color
+schemeborder_fg = "#ffffff"
+schemeborder_bg = "#ffffff"
+
+####################
+## Functionality ###
+####################
+
+# fuzzy matching by default
+fuzzy = 0
+
+# allows for multiple items to be selected by default
+multiselect = 0
+
+# show numbers of matches over total number of items in the top-right corner
+show_numbers = 0
+
+# print the item index instead of the item itself
+print_index = 0
+
+# character that replaces password inputs with
+censor_char = "*"
+
+# characters not considered part of a word while deleting words
+worddelimiters = " "

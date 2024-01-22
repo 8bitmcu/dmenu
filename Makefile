@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = drw.c dmenu.c stest.c util.c
+SRC = drw.c dmenu.c stest.c util.c tomlc99/toml.c
 OBJ = $(SRC:.c=.o)
 
 all: options dmenu stest
@@ -20,10 +20,10 @@ options:
 config.h:
 	cp config.def.h $@
 
-$(OBJ): arg.h config.h config.mk drw.h
+$(OBJ): arg.h config.h config.mk drw.h tomlc99/toml.h
 
-dmenu: dmenu.o drw.o util.o
-	$(CC) -o $@ dmenu.o drw.o util.o $(LDFLAGS)
+dmenu: ${OBJ}
+	$(CC) -o $@ dmenu.o drw.o util.o toml.o $(LDFLAGS)
 
 stest: stest.o
 	$(CC) -o $@ stest.o $(LDFLAGS)
@@ -53,7 +53,7 @@ install: all
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/dmenu.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/stest.1
 	mkdir -p /etc/dmenu 
-	cp -f dmenu.cfg /etc/dmenu
+	cp -f dmenu.toml /etc/dmenu
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/dmenu\
@@ -62,6 +62,6 @@ uninstall:
 		$(DESTDIR)$(PREFIX)/bin/stest\
 		$(DESTDIR)$(MANPREFIX)/man1/dmenu.1\
 		$(DESTDIR)$(MANPREFIX)/man1/stest.1 \
-		/etc/dmemu/dmenu.cfg
+		/etc/dmemu/dmenu.toml
 
 .PHONY: all options clean dist install uninstall

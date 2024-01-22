@@ -24,20 +24,21 @@ This fork merges the following patches:
 And adds the following other changes: 
 
 - **always vertical/centered**; there is no longer a horizontal mode
-- **configuration file**; using libconfig to loads configuration from `$XDG_CONFIG_HOME/dmenu/dmenu.cfg` if it exists
-- **margin and padding**; can be configured in `config.h` or `dmenu.cfg`
+- **configuration file**; loads configuration from `$XDG_CONFIG_HOME/dmenu/dmenu.toml` if it exists
+- **margin and padding**; can be configured in `config.h` or `dmenu.toml`
 - **inputless mode** using the -i flag
 - **prioritize history** items over exact matches
 - **faster** width calculation of large files
 - **minimum width** can be specified with the -W flag
 
+Have a look at [dmenu.toml](dmenu.toml)!
+
 Building and installing
 -----------------------
 
 1. clone this repository locally on your machine
-2. Install libconfig from your package manager
-3. run `make clean && sudo make install` from within the repository folder
-4. copy and edit the config file: `cp /etc/dmenu/dmenu.cfg $XDG_CONFIG_HOME/dmenu/dmenu.cfg`
+2. run `make clean && sudo make install` from within the repository folder
+3. copy and edit the config file: `cp /etc/dmenu/dmenu.toml $XDG_CONFIG_HOME/dmenu/dmenu.toml`
 
 Previews
 --------
