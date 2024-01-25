@@ -278,7 +278,7 @@ drawmenu(void)
   /* draw censor_char if passwd, otherwise draw user input */
 	if (passwd) {
 	        censort = ecalloc(1, sizeof(text));
-		memset(censort, censor_char, strlen(text));
+		memset(censort, censor_char[0], strlen(text));
 		drw_text(drw, x, y, w, bh, 0, censort, 0);
 		free(censort);
 	} else if (input)
@@ -1072,6 +1072,24 @@ usage(void)
       "           [-W width] [-F number] [-M number] [-n number] [-ix number]");
 }
 
+
+static void
+cfg_read_str(toml_table_t* conf, char* key, const char** dest)
+{
+  toml_datum_t d = toml_string_in(conf, key);
+  if (d.ok)
+    *dest = strdup(d.u.s);
+  free(d.u.s);
+}
+
+static void
+cfg_read_int(toml_table_t* conf, char* key, int* dest)
+{
+  toml_datum_t d = toml_int_in(conf, key);
+  if (d.ok)
+    *dest = d.u.i;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -1079,95 +1097,41 @@ main(int argc, char *argv[])
 	int i, fast = 0;
 
   const char *config_file = strcat(getenv("XDG_CONFIG_HOME"), dmenu_cfg);
-
-  FILE* fp;
-  char errbuf[200];
-  fp = fopen(config_file, "r");
-
-  toml_table_t* conf;
-  toml_datum_t d;
-
+  FILE* fp = fopen(config_file, "r");
   if(fp) {
-    conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
+    char errbuf[200];
+    toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);
+
     if (conf) {
-      d = toml_int_in(conf, "fuzzy");
-      if(d.ok)
-        fuzzy = d.u.i;
-      d = toml_int_in(conf, "multiselect");
-      if(d.ok)
-        multiselect = d.u.i;
-      d = toml_int_in(conf, "min_width");
-      if(d.ok)
-        min_width = d.u.i;
-      d = toml_int_in(conf, "print_index");
-      if(d.ok)
-        print_index = d.u.i;
-      d = toml_int_in(conf, "show_numbers");
-      if(d.ok)
-        show_numbers = d.u.i;
-      d = toml_int_in(conf, "item_height");
-      if(d.ok)
-        item_height = d.u.i;
-      d = toml_int_in(conf, "border_width");
-      if(d.ok)
-        border_width = d.u.i;
-      d = toml_int_in(conf, "border_padding");
-      if(d.ok)
-        border_padding = d.u.i;
-      d = toml_int_in(conf, "border_margin");
-      if(d.ok)
-        border_margin = d.u.i;
-      d = toml_int_in(conf, "prompt_offset");
-      if(d.ok)
-        prompt_offset = d.u.i;
-      d = toml_int_in(conf, "alpha");
-      if(d.ok)
-        alpha = d.u.i;
-      d = toml_int_in(conf, "lines");
-      if(d.ok)
-        lines = d.u.i;
-      d = toml_string_in(conf, "font");
-      if (d.ok)
-       fonts[0] = d.u.s;
-      d = toml_string_in(conf, "censor_char");
-      if (d.ok)
-       censor_char = d.u.s[0];
-      d = toml_string_in(conf, "worddelimiters");
-      if (d.ok)
-       worddelimiters = d.u.s;
-      d = toml_string_in(conf, "schemenorm_fg");
-      if (d.ok)
-        colors[SchemeNorm][ColFg] = d.u.s;
-      d = toml_string_in(conf, "schemenorm_bg");
-      if (d.ok)
-        colors[SchemeNorm][ColBg] = d.u.s;
-      d = toml_string_in(conf, "schemesel_fg");
-      if (d.ok)
-        colors[SchemeSel][ColFg] = d.u.s;
-      d = toml_string_in(conf, "schemesel_bg");
-      if (d.ok)
-        colors[SchemeSel][ColBg] = d.u.s;
-      d = toml_string_in(conf, "schemeselhighlight_fg");
-      if (d.ok)
-        colors[SchemeSelHighlight][ColFg] = d.u.s;
-      d = toml_string_in(conf, "schemeselhighlight_bg");
-      if (d.ok)
-        colors[SchemeSelHighlight][ColBg] = d.u.s;
-      d = toml_string_in(conf, "schemeout_fg");
-      if (d.ok)
-        colors[SchemeOut][ColFg] = d.u.s;
-      d = toml_string_in(conf, "schemeout_bg");
-      if (d.ok)
-        colors[SchemeOut][ColBg] = d.u.s;
-      d = toml_string_in(conf, "schemeborder_fg");
-      if (d.ok)
-        colors[SchemeBorder][ColFg] = d.u.s;
-      d = toml_string_in(conf, "schemeborder_bg");
-      if (d.ok)
-        colors[SchemeBorder][ColBg] = d.u.s;
+      cfg_read_int(conf, "fuzzy", &fuzzy);
+      cfg_read_int(conf, "multiselect", &multiselect);
+      cfg_read_int(conf, "min_width", &min_width);
+      cfg_read_int(conf, "print_index", &print_index);
+      cfg_read_int(conf, "show_numbers", &show_numbers);
+      cfg_read_int(conf, "item_height", &item_height);
+      cfg_read_int(conf, "border_width", &border_width);
+      cfg_read_int(conf, "border_padding", &border_padding);
+      cfg_read_int(conf, "border_margin", &border_margin);
+      cfg_read_int(conf, "prompt_offset", &prompt_offset);
+      cfg_read_int(conf, "alpha", &alpha);
+      cfg_read_int(conf, "lines", &lines);
+      cfg_read_str(conf, "font", &fonts[0]);
+      cfg_read_str(conf, "censor_char", &censor_char);
+      cfg_read_str(conf, "worddelimiters", &worddelimiters);
+      cfg_read_str(conf, "schemenorm_fg", &colors[SchemeNorm][ColFg]);
+      cfg_read_str(conf, "schemenorm_bg", &colors[SchemeNorm][ColBg]);
+      cfg_read_str(conf, "schemesel_fg", &colors[SchemeSel][ColFg]);
+      cfg_read_str(conf, "schemesel_bg", &colors[SchemeSel][ColBg]);
+      cfg_read_str(conf, "schemeselhighlight_fg", &colors[SchemeSelHighlight][ColFg]);
+      cfg_read_str(conf, "schemeselhighlight_bg", &colors[SchemeSelHighlight][ColBg]);
+      cfg_read_str(conf, "schemeout_fg", &colors[SchemeOut][ColFg]);
+      cfg_read_str(conf, "schemeout_bg", &colors[SchemeOut][ColBg]);
+      cfg_read_str(conf, "schemeborder_fg", &colors[SchemeBorder][ColFg]);
+      cfg_read_str(conf, "schemeborder_bg", &colors[SchemeBorder][ColBg]);
+
+      toml_free(conf);
     }
-    toml_free(conf);
   }
 
   // overwrite config with cmd line arguments 

@@ -35,10 +35,10 @@ static int border_padding = 10;
 static int border_margin = 25;
 
 /* amount of pixel between the prompt and other list items */
-static unsigned int prompt_offset = 10; 
+static int prompt_offset = 10; 
 
 /* Amount of opacity. 0xff is opaque */
-static unsigned int alpha = 0xcc;
+static int alpha = 0xcc;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = { "monospace:size=14" };
@@ -47,10 +47,10 @@ static const char *fonts[] = { "monospace:size=14" };
 static const char *prompt = NULL;
 
 /* dmenu uses vertical list with given number of lines */
-static unsigned int lines = 15;
+static int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
-static char censor_char = '*';
+static const char *censor_char = "*";
 /*
  * Characters not considered part of a word while deleting words
  * for example: " /?\"&[]"
