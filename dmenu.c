@@ -112,7 +112,7 @@ calcoffsets(void)
 {
 	int i, n;
 
-  n = lines * bh;
+	n = lines * bh;
 
 	/* calculate which items will begin the next page and previous page */
 	for (i = 0, next = curr; next; next = next->right)
@@ -127,24 +127,41 @@ static int
 max_textw(void)
 {
 
-  if(!items) 
-    return min_width;
+	if(!items)
+		return min_width;
 
-  // Max text length is based on the list item with the most characters
-  // This is fine for monospaced fonts, but not regular fonts
-  // But it is sooo much, much faster (especially on larger files)
+	// Max text length is based on the list item with the most characters
+	// This is fine for monospaced fonts, but not regular fonts
+	// But it is sooo much, much faster (especially on larger files)
 	struct item *max = NULL;
-  int maxl = 0;
+	int maxl = 0;
 
 	for (struct item *item = items; item && item->text; item++) {
-    if (strlen(item->text) > maxl) {
-      max = item;
-      maxl = strlen(item->text);
-    }
-  }
+		if (strlen(item->text) > maxl) {
+			max = item;
+			maxl = strlen(item->text);
+		}
+	}
 	return TEXTW(max->text);
 }
 
+static void
+cleanup_cfg(void)
+{
+	free((void *) fonts[0]);
+	free((void *) censor_char);
+	free((void *) worddelimiters);
+	free((void *) colors[SchemeNorm][ColFg]);
+	free((void *) colors[SchemeNorm][ColBg]);
+	free((void *) colors[SchemeSel][ColFg]);
+	free((void *) colors[SchemeSel][ColBg]);
+	free((void *) colors[SchemeSelHighlight][ColFg]);
+	free((void *) colors[SchemeSelHighlight][ColBg]);
+	free((void *) colors[SchemeOut][ColFg]);
+	free((void *) colors[SchemeOut][ColBg]);
+	free((void *) colors[SchemeBorder][ColFg]);
+	free((void *) colors[SchemeBorder][ColBg]);
+}
 
 static void
 cleanup(void)
@@ -161,6 +178,7 @@ cleanup(void)
 	XSync(dpy, False);
 	XCloseDisplay(dpy);
 	free(selid);
+	cleanup_cfg();
 }
 
 static char *
@@ -237,8 +255,8 @@ drawitem(struct item *item, int x, int y, int w)
 static void
 recalculatenumbers()
 {
-  if (!show_numbers) 
-    return;
+	if (!show_numbers)
+		return;
 
 	unsigned int numer = 0, denom = 0;
 	struct item *item;
@@ -260,12 +278,12 @@ drawmenu(void)
 	int x = border_margin, y = border_margin + border_padding, w;
 	char *censort;
 
-  recalculatenumbers();
+	recalculatenumbers();
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
 
-  /* draw prompt */
+	/* draw prompt */
 	if (prompt && *prompt) {
 		drw_setscheme(drw, scheme[SchemeOut]);
 		x = drw_text(drw, x, y, promptw, bh, lrpad / 2, prompt, 0);
@@ -275,34 +293,34 @@ drawmenu(void)
 	w = ((lines > 0 || !matches) ? mw - x : inputw) - TEXTW(numbers);
 	drw_setscheme(drw, scheme[SchemeOut]);
 
-  /* draw censor_char if passwd, otherwise draw user input */
+	/* draw censor_char if passwd, otherwise draw user input */
 	if (passwd) {
 	        censort = ecalloc(1, sizeof(text));
 		memset(censort, censor_char[0], strlen(text));
 		drw_text(drw, x, y, w, bh, 0, censort, 0);
 		free(censort);
 	} else if (input)
-    drw_text(drw, x, y, w, bh, 0, text, 0);
+		drw_text(drw, x, y, w, bh, 0, text, 0);
 
-  /* draw caret */
-  if (input) {
-    curpos = TEXTW(text) - TEXTW(&text[cursor]);
-    if (curpos < w) {
-      drw_setscheme(drw, scheme[SchemeNorm]);
-      drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
-    }
-  }
+	/* draw caret */
+	if (input) {
+		curpos = TEXTW(text) - TEXTW(&text[cursor]);
+		if (curpos < w) {
+			drw_setscheme(drw, scheme[SchemeNorm]);
+			drw_rect(drw, x + curpos, y+2, 2, bh - 4, 1, 0);
+		}
+	}
 
-  /* draw numbers */
-  if (show_numbers) {
-    drw_setscheme(drw, scheme[SchemeNorm]);
-    drw_text(drw, mw - TEXTW(numbers) - border_margin, y, TEXTW(numbers), bh, lrpad / 2, numbers, 0);
-  }
+	/* draw numbers */
+	if (show_numbers) {
+		drw_setscheme(drw, scheme[SchemeNorm]);
+		drw_text(drw, mw - TEXTW(numbers) - border_margin, y, TEXTW(numbers), bh, lrpad / 2, numbers, 0);
+	}
 
-  y += prompt_offset;
-  /* draw vertical list */
-  for (item = curr; item != next; item = item->right)
-    drawitem(item, x - promptw, y += bh, mw - (border_margin*2));
+	y += prompt_offset;
+	/* draw vertical list */
+	for (item = curr; item != next; item = item->right)
+		drawitem(item, x - promptw, y += bh, mw - (border_margin*2));
 
 
 	drw_map(drw, win, 0, 0, mw, mh);
@@ -456,12 +474,12 @@ match(void)
 				break;
 		if (i != tokc) /* not all tokens match */
 			continue;
-    /* prefixes go first, then exact matches, ignore substrings */
+		/* prefixes go first, then exact matches, ignore substrings */
 		if (!tokc || !fstrncmp(text, item->text, textsize))
 			appenditem(item, &lprefix, &prefixend);
 		else if (!fstrncmp(tokv[0], item->text, len))
 			appenditem(item, &lprefix, &prefixend);
-    // disable substrings
+		// disable substrings
 		//else
 			//appenditem(item, &lsubstr, &substrend);
 	}
@@ -488,8 +506,8 @@ match(void)
 static void
 insert(const char *str, ssize_t n)
 {
-  if (!input)
-    return;
+	if (!input)
+		return;
 
 	if (strlen(text) + n > sizeof text - 1)
 		return;
@@ -593,22 +611,22 @@ keypress(XKeyEvent *ev)
 			goto draw;
 		case XK_Return:
 		case XK_KP_Enter:
-      if(multiselect > 0) {
-        if (sel && issel(sel->id)) {
-          for (int i = 0;i < selidsize;i++)
-            if (selid[i] == sel->id)
-              selid[i] = -1;
-        } else {
-          for (int i = 0;i < selidsize;i++)
-            if (selid[i] == -1) {
-              selid[i] = sel->id;
-              return;
-            }
-          selidsize++;
-          selid = realloc(selid, (selidsize + 1) * sizeof(int));
-          selid[selidsize - 1] = sel->id;
-        }
-      }
+		if(multiselect > 0) {
+			if (sel && issel(sel->id)) {
+				for (int i = 0;i < selidsize;i++)
+					if (selid[i] == sel->id)
+						selid[i] = -1;
+			} else {
+				for (int i = 0;i < selidsize;i++)
+					if (selid[i] == -1) {
+						selid[i] = sel->id;
+						return;
+					}
+				selidsize++;
+				selid = realloc(selid, (selidsize + 1) * sizeof(int));
+				selid[selidsize - 1] = sel->id;
+			}
+		}
 			break;
 		case XK_bracketleft:
 			cleanup();
@@ -714,15 +732,15 @@ insert:
 	case XK_Return:
 	case XK_KP_Enter:
 		if (!(ev->state & ControlMask)) {
-      /* multi-select items */
+			/* multi-select items */
 			for (int i = 0;i < selidsize;i++)
 				if (selid[i] != -1 && (!sel || sel->id != selid[i]))
-          print_index ? printf("%d\n", items[selid[i]].id) : puts(items[selid[i]].text);
-      /* item that is currently under selection */
+					print_index ? printf("%d\n", items[selid[i]].id) : puts(items[selid[i]].text);
+			/* item that is currently under selection */
 			if (sel && !(ev->state & ShiftMask))
-        print_index ? printf("%d\n", sel->id) : puts(sel->text);
+				print_index ? printf("%d\n", sel->id) : puts(sel->text);
 			else
-        /* input from the textbox */ 
+				/* input from the textbox */
 				puts(print_index ? "-1" : text);
 			cleanup();
 			exit(0);
@@ -816,45 +834,45 @@ buttonpress(XEvent *e)
 	if (ev->state & ~ControlMask)
 		return;
 
-  /* vertical list: (ctrl)left-click on item */
-  w = mw - x;
-  for (item = curr; item != next; item = item->right) {
-    y += h;
-    if (ev->y >= y && ev->y <= (y + h)) {
-      if(multiselect || !(ev->state & ControlMask)) {
-        sel = item;
-        if (sel) {
-          if (sel && issel(sel->id)) {
-            for (int i = 0;i < selidsize;i++)
-              if (selid[i] == sel->id)
-                selid[i] = -1;
-          } else {
-            for (int i = 0;i < selidsize;i++)
-              if (selid[i] == -1) {
-                selid[i] = sel->id;
-                return;
-              }
-            selidsize++;
-            selid = realloc(selid, (selidsize + 1) * sizeof(int));
-            selid[selidsize - 1] = sel->id;
-          }
-          drawmenu();
-        }
-      }
-      if (!(ev->state & ControlMask)) {
-        for (int i = 0;i < selidsize;i++)
-          if (selid[i] != -1 && (!sel || sel->id != selid[i]))
-            puts(items[selid[i]].text);
-        if (sel && !(ev->state & ShiftMask))
-          puts(sel->text);
-        else
-          puts(text);
-        cleanup();
-        exit(0);
-      }
-      return;
-    }
-  }
+	/* vertical list: (ctrl)left-click on item */
+	w = mw - x;
+	for (item = curr; item != next; item = item->right) {
+		y += h;
+		if (ev->y >= y && ev->y <= (y + h)) {
+			if(multiselect || !(ev->state & ControlMask)) {
+				sel = item;
+				if (sel) {
+					if (sel && issel(sel->id)) {
+						for (int i = 0;i < selidsize;i++)
+							if (selid[i] == sel->id)
+								selid[i] = -1;
+					} else {
+						for (int i = 0;i < selidsize;i++)
+							if (selid[i] == -1) {
+								selid[i] = sel->id;
+								return;
+							}
+						selidsize++;
+						selid = realloc(selid, (selidsize + 1) * sizeof(int));
+						selid[selidsize - 1] = sel->id;
+					}
+					drawmenu();
+				}
+			}
+			if (!(ev->state & ControlMask)) {
+				for (int i = 0;i < selidsize;i++)
+					if (selid[i] != -1 && (!sel || sel->id != selid[i]))
+						puts(items[selid[i]].text);
+				if (sel && !(ev->state & ShiftMask))
+					puts(sel->text);
+				else
+					puts(text);
+				cleanup();
+				exit(0);
+			}
+			return;
+		}
+	}
 }
 
 
@@ -883,9 +901,9 @@ readstdin(void)
 	size_t i, itemsiz = 0, linesiz = 0;
 	ssize_t len;
 
-	if(passwd){
-    inputw = lines = 0;
-    return;
+	if (passwd) {
+		inputw = lines = 0;
+		return;
  	}
 
 	/* read each line from stdin and add it to the item list */
@@ -966,7 +984,7 @@ setup(void)
 #endif
 	/* init appearance */
 
-  unsigned int alphas[2] = { OPAQUE, alpha };
+	unsigned int alphas[2] = { OPAQUE, alpha };
 	for (j = 0; j < SchemeLast; j++)
 		scheme[j] = drw_scm_create(drw, colors[j], alphas, 2);
 
@@ -1016,9 +1034,9 @@ setup(void)
 		if (!XGetWindowAttributes(dpy, parentwin, &wa))
 			die("could not get embedding window attributes: 0x%lx",
 			    parentwin);
-    mw = MIN(MAX(max_textw() + promptw, min_width), wa.width);
-    x = (wa.width  - mw) / 2;
-    y = (wa.height - mh) / 2;
+		mw = MIN(MAX(max_textw() + promptw, min_width), wa.width);
+		x = (wa.width  - mw) / 2;
+		y = (wa.height - mh) / 2;
 	}
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = mw / 3; /* input width: ~33% of monitor width */
@@ -1037,7 +1055,7 @@ setup(void)
 	                    CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &swa);
 	if (border_width) {
 		XSetWindowBorder(dpy, win, scheme[SchemeBorder][ColBg].pixel);
-  }
+	}
 	XSetClassHint(dpy, win, &ch);
 
 
@@ -1076,18 +1094,17 @@ usage(void)
 static void
 cfg_read_str(toml_table_t* conf, char* key, const char** dest)
 {
-  toml_datum_t d = toml_string_in(conf, key);
-  if (d.ok)
-    *dest = strdup(d.u.s);
-  free(d.u.s);
+	toml_datum_t d = toml_string_in(conf, key);
+	if (d.ok)
+		*dest = d.u.s;
 }
 
 static void
 cfg_read_int(toml_table_t* conf, char* key, int* dest)
 {
-  toml_datum_t d = toml_int_in(conf, key);
-  if (d.ok)
-    *dest = d.u.i;
+	toml_datum_t d = toml_int_in(conf, key);
+	if (d.ok)
+		*dest = d.u.i;
 }
 
 int
@@ -1096,49 +1113,50 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
-  const char *config_file = strcat(getenv("XDG_CONFIG_HOME"), dmenu_cfg);
-  FILE* fp = fopen(config_file, "r");
-  if(fp) {
-    char errbuf[200];
-    toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
-    fclose(fp);
+	const char *config_file = strcat(getenv("XDG_CONFIG_HOME"), dmenu_cfg);
+	FILE* fp = fopen(config_file, "r");
+	if(fp) {
+		char errbuf[200];
+		toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
+		fclose(fp);
 
-    if (conf) {
-      cfg_read_int(conf, "fuzzy", &fuzzy);
-      cfg_read_int(conf, "multiselect", &multiselect);
-      cfg_read_int(conf, "min_width", &min_width);
-      cfg_read_int(conf, "print_index", &print_index);
-      cfg_read_int(conf, "show_numbers", &show_numbers);
-      cfg_read_int(conf, "item_height", &item_height);
-      cfg_read_int(conf, "border_width", &border_width);
-      cfg_read_int(conf, "border_padding", &border_padding);
-      cfg_read_int(conf, "border_margin", &border_margin);
-      cfg_read_int(conf, "prompt_offset", &prompt_offset);
-      cfg_read_int(conf, "alpha", &alpha);
-      cfg_read_int(conf, "lines", &lines);
-      cfg_read_str(conf, "font", &fonts[0]);
-      cfg_read_str(conf, "censor_char", &censor_char);
-      cfg_read_str(conf, "worddelimiters", &worddelimiters);
-      cfg_read_str(conf, "schemenorm_fg", &colors[SchemeNorm][ColFg]);
-      cfg_read_str(conf, "schemenorm_bg", &colors[SchemeNorm][ColBg]);
-      cfg_read_str(conf, "schemesel_fg", &colors[SchemeSel][ColFg]);
-      cfg_read_str(conf, "schemesel_bg", &colors[SchemeSel][ColBg]);
-      cfg_read_str(conf, "schemeselhighlight_fg", &colors[SchemeSelHighlight][ColFg]);
-      cfg_read_str(conf, "schemeselhighlight_bg", &colors[SchemeSelHighlight][ColBg]);
-      cfg_read_str(conf, "schemeout_fg", &colors[SchemeOut][ColFg]);
-      cfg_read_str(conf, "schemeout_bg", &colors[SchemeOut][ColBg]);
-      cfg_read_str(conf, "schemeborder_fg", &colors[SchemeBorder][ColFg]);
-      cfg_read_str(conf, "schemeborder_bg", &colors[SchemeBorder][ColBg]);
+		if (conf) {
+			cfg_read_int(conf, "fuzzy", &fuzzy);
+			cfg_read_int(conf, "multiselect", &multiselect);
+			cfg_read_int(conf, "min_width", &min_width);
+			cfg_read_int(conf, "print_index", &print_index);
+			cfg_read_int(conf, "show_numbers", &show_numbers);
+			cfg_read_int(conf, "item_height", &item_height);
+			cfg_read_int(conf, "border_width", &border_width);
+			cfg_read_int(conf, "border_padding", &border_padding);
+			cfg_read_int(conf, "border_margin", &border_margin);
+			cfg_read_int(conf, "prompt_offset", &prompt_offset);
+			cfg_read_int(conf, "alpha", &alpha);
+			cfg_read_int(conf, "lines", &lines);
+			cfg_read_str(conf, "font", &fonts[0]);
+			cfg_read_str(conf, "censor_char", &censor_char);
+			cfg_read_str(conf, "worddelimiters", &worddelimiters);
+			cfg_read_str(conf, "schemenorm_fg", &colors[SchemeNorm][ColFg]);
+			cfg_read_str(conf, "schemenorm_bg", &colors[SchemeNorm][ColBg]);
+			cfg_read_str(conf, "schemesel_fg", &colors[SchemeSel][ColFg]);
+			cfg_read_str(conf, "schemesel_bg", &colors[SchemeSel][ColBg]);
+			cfg_read_str(conf, "schemeselhighlight_fg", &colors[SchemeSelHighlight][ColFg]);
+			cfg_read_str(conf, "schemeselhighlight_bg", &colors[SchemeSelHighlight][ColBg]);
+			cfg_read_str(conf, "schemeout_fg", &colors[SchemeOut][ColFg]);
+			cfg_read_str(conf, "schemeout_bg", &colors[SchemeOut][ColBg]);
+			cfg_read_str(conf, "schemeborder_fg", &colors[SchemeBorder][ColFg]);
+			cfg_read_str(conf, "schemeborder_bg", &colors[SchemeBorder][ColBg]);
 
-      toml_free(conf);
-    }
-  }
+			toml_free(conf);
+		}
+	}
 
-  // overwrite config with cmd line arguments 
+	// overwrite config with cmd line arguments 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */
 			puts("dmenu-"VERSION);
+			cleanup_cfg();
 			exit(0);
 		} else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = 1;
@@ -1147,10 +1165,12 @@ main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-s")) { /* case-sensitive item matching */
 			fstrncmp = strncmp;
 			fstrstr = strstr;
-    } else if (!strcmp(argv[i], "-i")) /* input-less */
-      input = 0;
-		else if (i + 1 == argc)
+		} else if (!strcmp(argv[i], "-i")) /* input-less */
+			input = 0;
+		else if (i + 1 == argc) {
+			cleanup_cfg();
 			usage();
+		}
 		/* these options take one argument */
 		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
 			lines = atoi(argv[++i]);
@@ -1187,34 +1207,42 @@ main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
 		else if (!strcmp(argv[i], "-W"))   /* overwrite minimum width */
-      min_width = atoi(argv[++i]);
-    else if (!strcmp(argv[i], "-it")) {   /* initial text */
+			min_width = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-it")) {   /* initial text */
 			const char * text = argv[++i];
 			insert(text, strlen(text));
-		} 
-		else
+		}
+		else {
+			cleanup_cfg();
 			usage();
+		}
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
-	if (!(dpy = XOpenDisplay(NULL)))
+	if (!(dpy = XOpenDisplay(NULL))) {
+		cleanup_cfg();
 		die("cannot open display");
+	}
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
 	if (!embed || !(parentwin = strtol(embed, NULL, 0)))
 		parentwin = root;
-	if (!XGetWindowAttributes(dpy, parentwin, &wa))
+	if (!XGetWindowAttributes(dpy, parentwin, &wa)) {
+		cleanup_cfg();
 		die("could not get embedding window attributes: 0x%lx",
 		    parentwin);
+	}
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, wa.width, wa.height, visual, depth, cmap);
-	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
+	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
+		cleanup_cfg();
 		die("no fonts could be loaded.");
+	}
 
-  lrpad = drw->fonts->h;
-  if(border_padding > 0) {
-    lrpad += border_padding*2;
-  }
+	lrpad = drw->fonts->h;
+	if (border_padding > 0) {
+		lrpad += border_padding*2;
+	}
 
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath", NULL) == -1)
