@@ -1,7 +1,7 @@
 dmenu (fork)
 ============
 
-A bloated fork of suckless [dmenu](https://tools.suckless.org/dmenu) with lots of customizations.
+A **bloated** fork of suckless [dmenu](https://tools.suckless.org/dmenu) 5.4 with lots of customizations.
 
 This fork merges the following patches: 
 
