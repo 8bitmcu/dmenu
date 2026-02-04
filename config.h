@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
-/* Default settings; can be overriden by command line. */
+/* Default settings; can be overriden by command line or configuration file */
 
-/* configuration file location, subdirectory of XDG_CONFIG_HOME */
+/* configuration file location, subdirectory of XDG_CONFIG_HOME or HOME */
 static const char* dmenu_cfg = "/dmenu/dmenu.toml";
 
 /* -ix option; if 1 dmenu will print the index instead of the item */ 
@@ -41,7 +41,7 @@ static int prompt_offset = 10;
 static int alpha = 0xcc;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
-static const char *fonts[] = { "monospace:size=14" };
+static const char *fonts[] = { NULL };
 
 /* -p option; prompt to the left of input field */
 static const char *prompt = NULL;
@@ -50,19 +50,20 @@ static const char *prompt = NULL;
 static int lines = 15;
 
 /* character that will be used to hide text when the -P option is specified */
-static const char *censor_char = "*";
+static const char *censor_char = NULL;
 /*
  * Characters not considered part of a word while deleting words
  * for example: " /?\"&[]"
  */
-static const char *worddelimiters = " ";
+static const char *worddelimiters = NULL;
 
-static const char *colors[SchemeLast][2] = {
-	/*     fg         bg       */
-	[SchemeNorm] = { "#bbbbbb", "#000000" },
-	[SchemeSel] = { "#000000", "#81a2be" },
-	[SchemeSelHighlight] = { "#ffffff", "#81a2be" },
-	[SchemeNormHighlight] = { "#ffffff", "#000000" },
-	[SchemeOut] = { "#ffffff", "#000000" },
-	[SchemeBorder] = { "#ffffff", "#ffffff" }
+static char *colors[SchemeLast][2];
+
+static const char *default_colors[SchemeLast][2] = {
+    [SchemeNorm] = { "#bbbbbb", "#000000" },
+    [SchemeSel] = { "#000000", "#81a2be" },
+    [SchemeSelHighlight] = { "#ffffff", "#81a2be" },
+    [SchemeNormHighlight] = { "#ffffff", "#000000" },
+    [SchemeOut] = { "#ffffff", "#000000" },
+    [SchemeBorder] = { "#ffffff", "#ffffff" }
 };

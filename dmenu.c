@@ -145,22 +145,16 @@ max_textw(void)
 	return TEXTW(max->text);
 }
 
-static void
-cleanup_cfg(void)
-{
-	free((void *) fonts[0]);
-	free((void *) censor_char);
-	free((void *) worddelimiters);
-	free((void *) colors[SchemeNorm][ColFg]);
-	free((void *) colors[SchemeNorm][ColBg]);
-	free((void *) colors[SchemeSel][ColFg]);
-	free((void *) colors[SchemeSel][ColBg]);
-	free((void *) colors[SchemeSelHighlight][ColFg]);
-	free((void *) colors[SchemeSelHighlight][ColBg]);
-	free((void *) colors[SchemeOut][ColFg]);
-	free((void *) colors[SchemeOut][ColBg]);
-	free((void *) colors[SchemeBorder][ColFg]);
-	free((void *) colors[SchemeBorder][ColBg]);
+void cleanup_cfg() {
+	if (fonts[0]) free(fonts[0]);
+	if (censor_char) free(censor_char);
+	if (worddelimiters) free(worddelimiters);
+	if (prompt) free((void*)prompt);
+
+	for (int i = 0; i < SchemeLast; i++) {
+		free(colors[i][ColFg]);
+		free(colors[i][ColBg]);
+	}
 }
 
 static void
@@ -1091,15 +1085,16 @@ usage(void)
       "           [-W width] [-F number] [-M number] [-n number] [-ix number]");
 }
 
-
-static void
-cfg_read_str(toml_table_t* conf, char* key, const char** dest)
+static int
+cfg_read_str(toml_table_t *conf, const char *key, char **dest)
 {
 	toml_datum_t d = toml_string_in(conf, key);
-	if (d.ok)
-		*dest = d.u.s;
+	if (!d.ok) {
+		return 0;
+	}
+	*dest = d.u.s;
+	return 1;
 }
-
 static void
 cfg_read_int(toml_table_t* conf, char* key, int* dest)
 {
@@ -1114,12 +1109,33 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
-	const char *config_file = strcat(getenv("XDG_CONFIG_HOME"), dmenu_cfg);
-	FILE* fp = fopen(config_file, "r");
+  fonts[0] = strdup("monospace:size=14");
+  censor_char = strdup("*");
+  worddelimiters = strdup(" ");
+
+	for (int j = 0; j < SchemeLast; j++) {
+		colors[j][ColFg] = strdup(default_colors[j][ColFg]);
+		colors[j][ColBg] = strdup(default_colors[j][ColBg]);
+	}
+
+	char path[PATH_MAX];
+	const char *xdg = getenv("XDG_CONFIG_HOME");
+	const char *home = getenv("HOME");
+
+	if (xdg && xdg[0] != '\0') {
+		/* use xdg_config_home if set */
+		snprintf(path, sizeof(path), "%s%s", xdg, dmenu_cfg);
+	} else if (home && home[0] != '\0') {
+		/* fallback to ~/.config */
+		snprintf(path, sizeof(path), "%s/.config%s", home, dmenu_cfg);
+	}
+	FILE* fp = fopen(path, "r");
 	if(fp) {
 		char errbuf[200];
 		toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
 		fclose(fp);
+
+		char *tmp;
 
 		if (conf) {
 			cfg_read_int(conf, "fuzzy", &fuzzy);
@@ -1134,19 +1150,71 @@ main(int argc, char *argv[])
 			cfg_read_int(conf, "prompt_offset", &prompt_offset);
 			cfg_read_int(conf, "alpha", &alpha);
 			cfg_read_int(conf, "lines", &lines);
-			cfg_read_str(conf, "font", &fonts[0]);
-			cfg_read_str(conf, "censor_char", &censor_char);
-			cfg_read_str(conf, "worddelimiters", &worddelimiters);
-			cfg_read_str(conf, "schemenorm_fg", &colors[SchemeNorm][ColFg]);
-			cfg_read_str(conf, "schemenorm_bg", &colors[SchemeNorm][ColBg]);
-			cfg_read_str(conf, "schemesel_fg", &colors[SchemeSel][ColFg]);
-			cfg_read_str(conf, "schemesel_bg", &colors[SchemeSel][ColBg]);
-			cfg_read_str(conf, "schemeselhighlight_fg", &colors[SchemeSelHighlight][ColFg]);
-			cfg_read_str(conf, "schemeselhighlight_bg", &colors[SchemeSelHighlight][ColBg]);
-			cfg_read_str(conf, "schemeout_fg", &colors[SchemeOut][ColFg]);
-			cfg_read_str(conf, "schemeout_bg", &colors[SchemeOut][ColBg]);
-			cfg_read_str(conf, "schemeborder_fg", &colors[SchemeBorder][ColFg]);
-			cfg_read_str(conf, "schemeborder_bg", &colors[SchemeBorder][ColBg]);
+
+			if (cfg_read_str(conf, "font", &tmp)) {
+				free(fonts[0]);
+				fonts[0] = tmp;
+			}
+
+			if (cfg_read_str(conf, "censor_char", &tmp)) {
+				free(censor_char);
+				censor_char = tmp;
+			}
+
+			if (cfg_read_str(conf, "worddelimiters", &tmp)) {
+				free(worddelimiters);
+				worddelimiters = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemenorm_fg", &tmp)) {
+				free(colors[SchemeNorm][ColFg]);
+				colors[SchemeNorm][ColFg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemenorm_bg", &tmp)) {
+				free(colors[SchemeNorm][ColBg]);
+				colors[SchemeNorm][ColBg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemesel_fg", &tmp)) {
+				free(colors[SchemeSel][ColFg]);
+				colors[SchemeSel][ColFg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemesel_bg", &tmp)) {
+				free(colors[SchemeSel][ColBg]);
+				colors[SchemeSel][ColBg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeselhighlight_fg", &tmp)) {
+				free(colors[SchemeSelHighlight][ColFg]);
+				colors[SchemeSelHighlight][ColFg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeselhighlight_bg", &tmp)) {
+				free(colors[SchemeSelHighlight][ColBg]);
+				colors[SchemeSelHighlight][ColBg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeout_fg", &tmp)) {
+				free(colors[SchemeOut][ColFg]);
+				colors[SchemeOut][ColFg] = tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeout_bg", &tmp)) {
+				free(colors[SchemeOut][ColBg]);
+				colors[SchemeOut][ColBg] =tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeborder_fg", &tmp)) {
+				free(colors[SchemeBorder][ColFg]);
+				colors[SchemeBorder][ColFg] =tmp;
+			}
+
+			if (cfg_read_str(conf, "schemeborder_bg", &tmp)) {
+				free(colors[SchemeBorder][ColBg]);
+				colors[SchemeBorder][ColBg] = tmp;
+			}
 
 			toml_free(conf);
 		}
@@ -1185,27 +1253,37 @@ main(int argc, char *argv[])
 			show_numbers = atoi(argv[++i]); 
 		else if (!strcmp(argv[i], "-ix"))  /* adds ability to return index in list */
 			print_index = atoi(argv[++i]); 
-		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
-			prompt = argv[++i];
-		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
-			fonts[0] = argv[++i];
-		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
-			colors[SchemeNorm][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-nf"))  /* normal foreground color */
-			colors[SchemeNorm][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-sb"))  /* selected background color */
-			colors[SchemeSel][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-sf"))  /* selected foreground color */
-			colors[SchemeSel][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-nhb")) /* normal hi background color */
-			colors[SchemeNormHighlight][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-nhf")) /* normal hi foreground color */
-			colors[SchemeNormHighlight][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-shb")) /* selected hi background color */
-			colors[SchemeSelHighlight][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-shf")) /* selected hi foreground color */
-			colors[SchemeSelHighlight][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+		else if (!strcmp(argv[i], "-p")) {  /* adds prompt to left of input field */
+			free(prompt);
+			prompt = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-fn")) {/* font or font set */
+			free(fonts[0]);
+			fonts[0] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
+			free(colors[SchemeNorm][ColBg]);
+			colors[SchemeNorm][ColBg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
+			free(colors[SchemeNorm][ColFg]);
+			colors[SchemeNorm][ColFg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
+			free(colors[SchemeSel][ColBg]);
+			colors[SchemeSel][ColBg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
+			free(colors[SchemeSel][ColFg]);
+			colors[SchemeSel][ColFg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-nhb")) { /* normal hi background color */
+			free(colors[SchemeNormHighlight][ColBg]);
+			colors[SchemeNormHighlight][ColBg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-nhf")) { /* normal hi foreground color */
+			free(colors[SchemeNormHighlight][ColFg]);
+			colors[SchemeNormHighlight][ColFg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-shb")) { /* selected hi background color */
+			free(colors[SchemeSelHighlight][ColBg]);
+			colors[SchemeSelHighlight][ColBg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-shf")) { /* selected hi foreground color */
+			free(colors[SchemeSelHighlight][ColFg]);
+			colors[SchemeSelHighlight][ColFg] = strdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
 		else if (!strcmp(argv[i], "-W"))   /* overwrite minimum width */
 			min_width = atoi(argv[++i]);

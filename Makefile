@@ -11,9 +11,6 @@ all: dmenu stest
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
-config.h:
-	cp config.def.h $@
-
 $(OBJ): arg.h config.h config.mk drw.h tomlc99/toml.h
 
 dmenu: ${OBJ}
@@ -27,7 +24,7 @@ clean:
 
 dist: clean
 	mkdir -p dmenu-$(VERSION)
-	cp LICENSE Makefile README.md arg.h config.def.h config.mk config.cfg dmenu.1\
+	cp LICENSE Makefile README.md arg.h config.h config.mk config.cfg dmenu.1\
 		drw.h util.h dmenu_path dmenu_run stest.1 $(SRC)\
 		dmenu-$(VERSION)
 	tar -cf dmenu-$(VERSION).tar dmenu-$(VERSION)
