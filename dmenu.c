@@ -146,9 +146,12 @@ max_textw(void)
 }
 
 void cleanup_cfg() {
-	if (fonts[0]) free(fonts[0]);
-	if (censor_char) free(censor_char);
-	if (worddelimiters) free(worddelimiters);
+	for (int j = 0; j < 4; j++) {
+		if (fonts[j]) free((void *)fonts[j]);
+	}
+
+	if (censor_char) free((void *)censor_char);
+	if (worddelimiters) free((void *)worddelimiters);
 	if (prompt) free((void*)prompt);
 
 	for (int i = 0; i < SchemeLast; i++) {
@@ -1079,10 +1082,37 @@ setup(void)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bfvsiP] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	    "           [-nhb color] [-nhf color] [-shb color] [-shf color] [-nb color]\n"
-      "           [-nf color] [-sb color] [-sf color] [-w windowid] [-it text ]\n"
-      "           [-W width] [-F number] [-M number] [-n number] [-ix number]");
+	die(
+		"usage: dmenu [options]\n\n"
+		" \033[1mOPTIONS\033[0m\n"
+		"  -v              prints version information\n"
+		"  -f              grabs keyboard before reading stdin\n"
+		"  -P              input is a password (hides characters)\n"
+		"  -s              enable case-sensitive item matching\n"
+		"  -i              input-less mode\n"
+		" \033[1mPARAMETERS\033[0m\n"
+		"  -l  \033[1mlines\033[0m       number of lines in vertical list\n"
+		"  -m  \033[1mmonitor\033[0m     monitor index to use\n"
+		"  -p  \033[1mprompt\033[0m      prompt text to the left of input field\n"
+		"  -fn \033[1mfonts\033[0m       comma-separated font set (e.g. \"Monospace:size=12,JoyPixels\")\n"
+		"  -it \033[1mtext\033[0m        initial text to populate the input field\n"
+		"  -w  \033[1mwindowid\033[0m    embedding window ID\n"
+		"  -W  \033[1mwidth\033[0m       overwrite minimum window width\n"
+		"  -F  \033[1mfuzzy\033[0m       enable (1) or disable (0) fuzzy matching\n"
+		"  -M  \033[1mmulti\033[0m       enable (1) or disable (0) multiple selections\n"
+		"  -n  \033[1mnumber\033[0m      show number of matches (1) or not (0)\n"
+		"  -ix \033[1mindex\033[0m       return index in list (1) or not (0)\n\n"
+		" \033[1mCOLORS\033[0m\n"
+		"  -nb  \033[1mcolor\033[0m      normal background color\n"
+		"  -nf  \033[1mcolor\033[0m      normal foreground color\n"
+		"  -sb  \033[1mcolor\033[0m      selected background color\n"
+		"  -sf  \033[1mcolor\033[0m      selected foreground color\n"
+		"  -nhb \033[1mcolor\033[0m      normal highlight background color\n"
+		"  -nhf \033[1mcolor\033[0m      normal highlight foreground color\n"
+		"  -shb \033[1mcolor\033[0m      selected highlight background color\n"
+		"  -shf \033[1mcolor\033[0m      selected highlight foreground color\n",
+		stderr
+	);
 }
 
 static int
@@ -1109,9 +1139,10 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
-  fonts[0] = strdup("monospace:size=14");
-  censor_char = strdup("*");
-  worddelimiters = strdup(" ");
+	fonts[0] = strdup("monospace:size=12");
+	fonts[1] = NULL;
+	censor_char = strdup("*");
+	worddelimiters = strdup(" ");
 
 	for (int j = 0; j < SchemeLast; j++) {
 		colors[j][ColFg] = strdup(default_colors[j][ColFg]);
@@ -1151,18 +1182,29 @@ main(int argc, char *argv[])
 			cfg_read_int(conf, "alpha", &alpha);
 			cfg_read_int(conf, "lines", &lines);
 
-			if (cfg_read_str(conf, "font", &tmp)) {
-				free(fonts[0]);
-				fonts[0] = tmp;
-			}
+			toml_array_t *font_arr = toml_array_in(conf, "fonts");
+			if (font_arr) {
+				for (int j = 0; j < 4; j++) {
+					free((void *)fonts[j]);
+					fonts[j] = NULL;
+				}
 
+				int num_fonts = toml_array_nelem(font_arr);
+				for (int j = 0; j < num_fonts && j < 4; j++) {
+					toml_datum_t d = toml_string_at(font_arr, j);
+					if (d.ok) {
+						fonts[j] = d.u.s;
+					}
+				}
+				fonts[num_fonts] = NULL;
+			}
 			if (cfg_read_str(conf, "censor_char", &tmp)) {
-				free(censor_char);
+				free((void *)censor_char);
 				censor_char = tmp;
 			}
 
 			if (cfg_read_str(conf, "worddelimiters", &tmp)) {
-				free(worddelimiters);
+				free((void *)worddelimiters);
 				worddelimiters = tmp;
 			}
 
@@ -1254,11 +1296,27 @@ main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-ix"))  /* adds ability to return index in list */
 			print_index = atoi(argv[++i]); 
 		else if (!strcmp(argv[i], "-p")) {  /* adds prompt to left of input field */
-			free(prompt);
+			free((void *)prompt);
 			prompt = strdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-fn")) {/* font or font set */
-			free(fonts[0]);
-			fonts[0] = strdup(argv[++i]);
+			char *arg = argv[++i];
+			char *token;
+			int j = 0;
+
+			for (int k = 0; k < 4; k++) {
+					if (fonts[k]) {
+							free((void *)fonts[k]);
+							fonts[k] = NULL;
+					}
+			}
+
+			char *tmp_arg = strdup(arg);
+			token = strtok(tmp_arg, ",");
+			while (token && j < 3) {
+					fonts[j++] = strdup(token);
+					token = strtok(NULL, ",");
+			}
+			free(tmp_arg);
 		} else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
 			free(colors[SchemeNorm][ColBg]);
 			colors[SchemeNorm][ColBg] = strdup(argv[++i]);
@@ -1313,7 +1371,12 @@ main(int argc, char *argv[])
 	}
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, wa.width, wa.height, visual, depth, cmap);
-	if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
+
+	size_t font_count = 0;
+	while (fonts[font_count] != NULL && font_count < 4)
+		font_count++;
+
+	if (!drw_fontset_create(drw, fonts, font_count)) {
 		cleanup_cfg();
 		die("no fonts could be loaded.");
 	}
