@@ -36,7 +36,10 @@ Have a look at [dmenu.toml](dmenu.toml)!
 Building and installing
 -----------------------
 
-1. clone this repository locally on your machine
+1. clone this repository with submodules locally on your machine:
+```Bash
+git clone --recursive https://github.com/8bitmcu/dmenu.git
+```
 2. run `make clean && sudo make install` from within the repository folder
 3. copy and edit the config file: `cp /etc/dmenu/dmenu.toml $XDG_CONFIG_HOME/dmenu/dmenu.toml`
 
@@ -72,5 +75,5 @@ Previews
 
 
 ### Edit dotfiles; fuzzy matching enabled & numbers displayed
-`select=$(find ~ -type f | dmenu -F -n -p "~") && [[ -n $select ]] && $TERMINAL -e $EDITOR $select`
+`select=$(find ~ -type f | dmenu -F 1 -n 1 -p "~") && [[ -n $select ]] && $TERMINAL -e $EDITOR $select`
 ![dmenu](assets/dmenu_editor.jpg)

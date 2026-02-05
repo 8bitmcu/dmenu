@@ -40,7 +40,7 @@ static int prompt_offset = 10;
 /* Amount of opacity. 0xff is opaque */
 static int alpha = 0xcc;
 
-/* -fn option overrides fonts[0]; default X11 font or font set */
+/* -fn option overrides fonts; default X11 font or font set */
 static const char *fonts[4] = { NULL };
 
 /* -p option; prompt to the left of input field */

@@ -118,7 +118,6 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
 			fprintf(stderr, "error, cannot load font from pattern.\n");
 			return NULL;
 		}
-		pattern = fontpattern;
 	} else {
 		die("no font specified.");
 	}
@@ -319,12 +318,12 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 							x += tmpw;
 						else
 							utf8strlen = ellipsis_len;
-					} else if (curfont != usedfont) {
-						nextfont = curfont;
-					} else {
+					} else if (curfont == usedfont) {
 						text += utf8charlen;
 						utf8strlen += utf8err ? 0 : utf8charlen;
 						ew += utf8err ? 0 : tmpw;
+					} else {
+						nextfont = curfont;
 					}
 					break;
 				}
